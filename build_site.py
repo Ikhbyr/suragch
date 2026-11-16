@@ -43,6 +43,8 @@ def build_lesson(path):
     info = cfg.get("letter_info", {})
     data = {
         "id": name,
+        "subject": cfg.get("subject", "reading"),
+        "grade": cfg.get("grade", 1),
         "number": cfg.get("lesson_number"),
         "title": cfg.get("title", "Уншиж сурцгаая!"),
         "letters": letters,
@@ -102,7 +104,7 @@ def build_lesson(path):
 
 def main():
     lessons = [build_lesson(p) for p in sorted(glob.glob(os.path.join(ROOT, "lessons", "*.json")))]
-    lessons.sort(key=lambda d: d["number"] or 0)
+    lessons.sort(key=lambda d: (d["grade"], d["subject"], d["number"] or 0))
     os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
     with open(os.path.join(SITE, "data", "lessons.js"), "w", encoding="utf-8") as f:
         f.write("// build_site.py-аар үүсгэсэн. Гараар засах шаардлагагүй.\n")

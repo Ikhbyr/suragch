@@ -58,6 +58,10 @@ def colored_text(d, text, cx, cy, size, path=M.F_HEAD, stroke=0):
                stroke_width=stroke, stroke_fill=PAPER)
 
 
+C_NUM = (52, 160, 75)
+C_SIGN = (240, 120, 40)
+
+
 def tile(ch, size, angle, new=False):
     pad = int(size * 0.25)
     im = Image.new("RGBA", (size + pad * 2, size + pad * 2), (0, 0, 0, 0))
@@ -66,7 +70,8 @@ def tile(ch, size, angle, new=False):
     d.rounded_rectangle([pad + 8, pad + 14, pad + size + 8, pad + size + 14], r, fill=(25, 66, 150, 255))
     d.rounded_rectangle([pad, pad, pad + size, pad + size], r, fill=(255, 241, 184) if new else (255, 255, 255),
                         outline=TILE_BORDER, width=max(4, size // 22))
-    M.draw_word(d, ch, pad + size / 2, pad + size / 2, size * 0.66)
+    color = C_NUM if ch.isdigit() else C_SIGN if not ch.isalpha() else None
+    M.draw_word(d, ch, pad + size / 2, pad + size / 2, size * 0.66, color=color)
     return im.rotate(angle, resample=Image.BICUBIC, expand=False)
 
 
@@ -78,18 +83,18 @@ def banner(path):
     box = (430, 470, 2130, 975)
     paper(d, box, 62, 560, 26)
     spiral(d, box[0] + 30, box[2] - 30, box[1] + 4, 62, 13)
-    colored_text(d, "Уншиж сурцгаая!", 1300, 655, 148)
-    M.draw_text_center(d, "1-р ангийн уншлагын хичээл", 1300, 830, 70, INK_SOFT)
+    colored_text(d, M.BRAND, 1300, 660, 210)
+    M.draw_text_center(d, "1–3-р ангийн хичээл: уншлага, математик", 1300, 835, 62, INK_SOFT)
     # хажуугийн үсгийн хавтангууд (компьютер, ТВ дээр харагдана)
-    left = [("а", 150, 520, -10), ("м", 300, 700, 8), ("б", 130, 860, 6), ("э", 340, 1010, -7)]
-    right = [("с", 2430, 520, 9, True), ("ү", 2260, 700, -8), ("и", 2440, 870, -5), ("ө", 2230, 1010, 7)]
+    left = [("а", 150, 520, -10), ("1", 300, 700, 8), ("м", 130, 860, 6), ("+", 340, 1010, -7)]
+    right = [("2", 2430, 520, 9), ("с", 2260, 700, -8), ("=", 2440, 870, -5), ("3", 2230, 1010, 7)]
     for item in left + right:
         ch, x, y, a = item[:4]
         new = len(item) > 4
         t = tile(ch, 190, a, new)
         im.paste(t, (int(x - t.width / 2), int(y - t.height / 2)), t)
-    M.paste_emoji(im, "📚", 1960, 845, 90)
-    M.paste_emoji(im, "✏️", 650, 845, 80)
+    M.paste_emoji(im, "📚", 1960, 640, 120)
+    M.paste_emoji(im, "✏️", 650, 640, 110)
     im.save(path, optimize=True)
 
 
@@ -99,7 +104,7 @@ def profile(path):
     d = ImageDraw.Draw(im)
     box = (170, 170, 630, 630)
     paper(d, box, 54, 230, 60)
-    M.draw_word(d, "Аа", S / 2 + 20, S / 2 + 6, 260)
+    M.draw_word(d, "С", S / 2 + 22, S / 2 + 4, 330, ref="ам")
     im.save(path, optimize=True)
 
 
@@ -116,7 +121,7 @@ def watermark(path):
         d.line([box[0] + 6, y, box[2] - 6, y], fill=RULE + (255,), width=4)
         y += 46
     d.line([78, box[1], 78, box[3]], fill=MARGIN + (255,), width=5)
-    M.draw_word(d, "Аа", S / 2 + 12, S / 2 + 4, 150)
+    M.draw_word(d, "С", S / 2 + 14, S / 2 + 4, 190, ref="ам")
     im.save(path, optimize=True)
 
 

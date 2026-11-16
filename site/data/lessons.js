@@ -2,6 +2,8 @@
 window.LESSONS = [
  {
   "id": "hicheel_07",
+  "subject": "reading",
+  "grade": 1,
   "number": 7,
   "title": "Уншиж сурцгаая!",
   "letters": "аэийымс",

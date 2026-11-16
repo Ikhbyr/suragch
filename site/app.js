@@ -96,10 +96,18 @@
     ["game", "🎮", "Тоглоом", "#dd4479"],
   ];
 
+  const BRAND = "Сурагч";
+  const GRADES = [1, 2, 3];
+  const SUBJECTS = [
+    ["reading", "📖", "Уншлага"],
+    ["math", "🔢", "Математик"],
+  ];
+  const subjectName = (k) => (SUBJECTS.find((s) => s[0] === k) || [k, "", k])[2];
+
   function route() {
     stopAll();
     const [id, tab] = location.hash.replace(/^#\/?/, "").split("/");
-    const lesson = LESSONS.find((l) => String(l.number) === id);
+    const lesson = LESSONS.find((l) => l.id === id);
     if (lesson) lessonView(lesson, TABS.some((t) => t[0] === tab) ? tab : "video");
     else home();
     window.scrollTo(0, 0);
@@ -107,38 +115,51 @@
   window.addEventListener("hashchange", route);
 
   // ------------------------------------------------ нүүр
+  function lessonRow(l) {
+    return `
+      <li class="lesson-row">
+        <span class="lesson-num" aria-hidden="true">${l.number}</span>
+        <div>
+          <div class="lesson-letters" aria-label="Үсгүүд: ${[...l.letters].join(", ")}">
+            ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
+          </div>
+        </div>
+        <a class="btn" href="#/${l.id}">▶ ${l.number}-р хичээл</a>
+      </li>`;
+  }
+
   function home() {
-    document.title = "Уншиж сурцгаая! | 1-р ангийн уншлага";
-    const title = "Уншиж сурцгаая!";
-    const h1 = [...title].map((ch, i) =>
-      `<span class="tw ${cls(ch)}" style="animation-delay:${i * 45}ms">${ch === " " ? "&nbsp;" : esc(ch)}</span>`).join("");
+    document.title = `${BRAND} | 1–3-р ангийн хичээл`;
+    const h1 = [...BRAND].map((ch, i) =>
+      `<span class="tw ${cls(ch)}" style="animation-delay:${i * 60}ms">${esc(ch)}</span>`).join("");
     app.innerHTML = `
       <header class="hero">
-        <h1 aria-label="${title}">${h1}</h1>
-        <p>Нэгдүгээр ангийн уншлагын хичээлүүд</p>
+        <h1 aria-label="${BRAND}">${h1}</h1>
+        <p>1–3-р ангийн хүүхдэд зориулсан хичээлүүд</p>
       </header>
-      ${LESSONS.length ? "" : `<p class="hint">Хичээл алга байна. build_site.py-г ажиллуулна уу.</p>`}
-      <ol class="lesson-list">
-        ${LESSONS.map((l) => `
-          <li class="lesson-row">
-            <span class="lesson-num" aria-hidden="true">${l.number}</span>
-            <div>
-              <div class="lesson-letters" aria-label="Үсгүүд: ${[...l.letters].join(", ")}">
-                ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
-              </div>
-            </div>
-            <a class="btn" href="#/${l.number}">▶ ${l.number}-р хичээл</a>
-          </li>`).join("")}
-      </ol>`;
+      ${GRADES.map((g) => {
+        const inGrade = LESSONS.filter((l) => l.grade === g);
+        return `<section class="grade" aria-labelledby="g${g}">
+          <h2 class="grade-title" id="g${g}">${g}-р анги</h2>
+          ${inGrade.length ? SUBJECTS.map(([k, ico, name]) => {
+            const list = inGrade.filter((l) => l.subject === k);
+            return `<div class="subject">
+              <h3><span aria-hidden="true">${ico}</span> ${name}</h3>
+              ${list.length ? `<ol class="lesson-list">${list.map(lessonRow).join("")}</ol>`
+                : `<p class="soon">Удахгүй нэмэгдэнэ.</p>`}
+            </div>`;
+          }).join("") : `<p class="soon">Хичээлүүд удахгүй нэмэгдэнэ.</p>`}
+        </section>`;
+      }).join("")}`;
   }
 
   // ------------------------------------------------ хичээл
   function lessonView(l, tab) {
-    document.title = `${l.number}-р хичээл: ${[...l.letters].join(" ")} | Уншиж сурцгаая!`;
+    document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${[...l.letters].join(" ")} | ${BRAND}`;
     app.innerHTML = `
       <div class="lesson-head">
-        <a class="btn ghost back" href="#/">← Хичээлүүд</a>
-        <h1>${l.number}-р хичээл</h1>
+        <a class="btn ghost back" href="#/">← Нүүр</a>
+        <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}</small></h1>
         <div class="lesson-letters" aria-label="Үсгүүд">
           ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
         </div>
@@ -150,7 +171,7 @@
           </button>`).join("")}
       </div>
       <section class="panel" role="tabpanel"></section>`;
-    $$(".tab").forEach((b) => b.addEventListener("click", () => { location.hash = `#/${l.number}/${b.dataset.tab}`; }));
+    $$(".tab").forEach((b) => b.addEventListener("click", () => { location.hash = `#/${l.id}/${b.dataset.tab}`; }));
     const panel = $(".panel");
     ({ video: videoPanel, letters: lettersPanel, syl: sylPanel, words: wordsPanel, sent: sentPanel, game: gamePanel })[tab](panel, l);
   }

@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 import edge_tts
 
 W, H, FPS, SR = 1280, 720, 25, 24000
+BRAND = "Сурагч"   # суваг, сайтын нэр
 FD = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
 F_TEXT = os.path.join(FD, "segoeuib.ttf")   # уншуулах текст (хоёр давхар "а")
 F_HEAD = os.path.join(FD, "seguibl.ttf")    # гарчиг
@@ -734,19 +735,19 @@ WATERMARK = True
 
 
 @lru_cache(None)
-def watermark_img():
-    """Видеоны зүүн доод буланд байх жижиг лого (сувгийн нэр)."""
-    text = "Уншиж сурцгаая"
-    f = font(F_HEAD, 22)
+def watermark_img(k=1):
+    """Видеоны зүүн доод буланд байх жижиг лого (сувгийн нэр). k - томруулах үржвэр."""
+    text = BRAND
+    f = font(F_HEAD, 24 * k)
     tw = int(f.getlength(text))
-    w, h = 58 + tw + 20, 52
+    w, h = 58 * k + tw + 20 * k, 52 * k
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle([0, 0, w - 1, h - 1], 26, fill=(255, 255, 255, 185))
-    d.rounded_rectangle([6, 6, 46, 46], 10, fill=(43, 103, 216, 255))
-    d.rounded_rectangle([9, 9, 43, 43], 8, fill=(253, 254, 255, 255))
-    draw_word(d, "Аа", 27, 27, 22)
-    d.text((56, h / 2), text, font=f, fill=(43, 103, 216, 235), anchor="lm")
+    d.rounded_rectangle([0, 0, w - 1, h - 1], 26 * k, fill=(255, 255, 255, 185))
+    d.rounded_rectangle([6 * k, 6 * k, 46 * k, 46 * k], 10 * k, fill=(43, 103, 216, 255))
+    d.rounded_rectangle([9 * k, 9 * k, 43 * k, 43 * k], 8 * k, fill=(253, 254, 255, 255))
+    draw_word(d, "С", 27 * k, 27 * k, 30 * k, ref="ам")
+    d.text((56 * k, h / 2), text, font=f, fill=(43, 103, 216, 235), anchor="lm")
     return im
 
 
@@ -767,11 +768,11 @@ def frame_at(tl, bg, starts, t, letters, new):
 def make_thumbnail(cfg, bg, path):
     fr = bg.copy()
     d = ImageDraw.Draw(fr)
-    draw_text_center(d, cfg.get("title", "Уншиж сурцгаая!"), W / 2, 130, 100, (255, 112, 40),
+    draw_text_center(d, cfg.get("title", "Уншиж сурцгаая!"), W / 2, 205, 96, (255, 112, 40),
                      stroke=10, stroke_fill=C_WHITE)
     letters, new = cfg["letters"], cfg.get("new_letters", "")
     cell = min(150, (W - 120) / len(letters) - 16)
-    for i, (x, y) in enumerate(grid(len(letters), 360, cell, 16, maxrow=12)):
+    for i, (x, y) in enumerate(grid(len(letters), 385, cell, 16, maxrow=12)):
         ch = letters[i]
         draw_tile(d, ch, x, y, cell, cell * 1.1, text_size=cell * 0.75,
                   fill=(255, 238, 160) if ch in new else C_WHITE)
@@ -780,7 +781,9 @@ def make_thumbnail(cfg, bg, path):
         d.rounded_rectangle([60, 520, 470, 640], 60, fill=(33, 140, 230))
         draw_text_center(d, f"{num}-р хичээл", 265, 580, 64, C_WHITE)
     d.rounded_rectangle([W - 420, 520, W - 60, 640], 60, fill=(67, 170, 80))
-    draw_text_center(d, "1-р анги", W - 240, 580, 64, C_WHITE)
+    draw_text_center(d, f"{cfg.get('grade', 1)}-р анги", W - 240, 580, 64, C_WHITE)
+    big = watermark_img(2)
+    fr.paste(big, (int(W / 2 - big.width / 2), 22), big)
     paste_emoji(fr, "📚", W / 2, 585, 150)
     fr.save(path)
 
@@ -793,9 +796,10 @@ def write_youtube(cfg, chapters, name, root, bg):
     num = cfg.get("lesson_number", "")
     words = ", ".join(w["w"] for w in cfg["words"])
     chap = "\n".join(f"{int(t // 60)}:{int(t % 60):02d} {n}" for t, n in chapters)
-    title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | 1-р анги"
+    grade = cfg.get("grade", 1)
+    title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | {grade}-р анги | {BRAND}"
     desc = "\n".join([
-        "Нэгдүгээр ангийн хүүхдэд зориулсан уншлагын хичээл.",
+        f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
         f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина.",
         f"Шинэ үсэг: {new}",
         "",
@@ -806,9 +810,11 @@ def write_youtube(cfg, chapters, name, root, bg):
         "",
         f"Унших үгс: {words}",
         "",
-        "#уншлага #1ранги #монголхэл #цагаантолгой",
+        "Бусад хичээл: https://ikhbyr.github.io/suragch/",
+        "",
+        f"#{BRAND.lower()} #уншлага #{grade}ранги #монголхэл #цагаантолгой",
     ])
-    tags = ("уншлага, уншиж сурах, цагаан толгой, монгол хэл, 1-р анги, нэгдүгээр анги, "
+    tags = (f"{BRAND.lower()}, уншлага, уншиж сурах, цагаан толгой, монгол хэл, 1-р анги, нэгдүгээр анги, "
             "бага анги, үсэг, үе холбох, хүүхдэд, хичээл, " + ", ".join(cfg["letters"]) + " үсэг")
     thumb = os.path.join(out, f"{name}_thumbnail.png")
     make_thumbnail(cfg, bg, thumb)

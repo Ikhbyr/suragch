@@ -4,7 +4,7 @@
 
 Хичээлүүдийг `lessons/<анги>/<хичээл>/` хавтсанд хадгалж болно (жишээ нь `lessons/1/math/hicheel_01.json`). Хичээлийн түлхүүрүүд (`subject`): `mongol`, `math`, `orchin`, `baigal`, `niigem`, `english`, `art`, `music`, `pe`. Шинэ хичээл нэмэх бол `site/app.js` доторх `SUBJECTS` жагсаалтад нэмнэ.
 
-Сайт: https://ikhbyr.github.io/suragch/
+Сайт: https://suragch.cloud/
 
 Сайтыг шинэчлэх: `python build_site.py` ажиллуулаад `git add -A`, `git commit -m "..."`, `git push`. Хэдхэн минутын дараа сайт автоматаар шинэчлэгдэнэ.
 

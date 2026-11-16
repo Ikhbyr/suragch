@@ -819,7 +819,7 @@ def write_youtube(cfg, chapters, name, root, bg):
         "",
         f"Унших үгс: {words}",
         "",
-        "Бусад хичээл: https://ikhbyr.github.io/suragch/",
+        "Бусад хичээл: https://suragch.cloud/",
         "",
         f"#{BRAND.lower()} #уншлага #{grade}ранги #монголхэл #цагаантолгой",
     ])

@@ -20,6 +20,14 @@
 | `youtube/` | YouTube-д оруулах гарчиг, тайлбар, нүүр зураг |
 | `site/` | Вэб сайт. Энэ хавтсыг бүхэлд нь интернэтэд байршуулна |
 
+## Дуу хоолой, арын хөгжим
+
+- Нийтлэг тохиргоо `settings.json` файлд байна: `tts_provider` (`chimege` эсвэл `edge`), Chimege-ийн хоолой (`voice`), өнгө (`pitch`), хурд, арын хөгжмийн чанга (`music_volume`, 0 бол хөгжимгүй).
+- Chimege токенийг `.chimege_token` файлд хадгална (git-д орохгүй). Терминалд:
+  `Set-Content -Path .chimege_token -Value (Read-Host "Chimege token") -Encoding ascii`
+- Бүх хоолойн жишээ сонсох: `python make_lesson.py --voices` → `samples/` хавтас.
+- Нэг дуудалт = 200 тэмдэгт хүртэл, 8₮. Үүсгэсэн дуу `.tts_cache`-д хадгалагдах тул дахин төлөхгүй.
+
 ## Шинэ хичээл нэмэх
 
 1. `lessons/hicheel_07.json` файлыг `hicheel_08.json` нэрээр хуулна.

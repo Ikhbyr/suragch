@@ -11,6 +11,7 @@ import glob
 import json
 import os
 import shutil
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -21,17 +22,16 @@ SITE = os.path.join(ROOT, "site")
 
 
 def build_lesson(path):
-    with open(path, encoding="utf-8") as f:
-        cfg = json.load(f)
+    cfg = M.load_cfg(path)
     M.validate(cfg)
     name = M.lesson_id(path)
-    tts = M.TTS(cfg.get("voice", "mn-MN-YesuiNeural"), os.path.join(ROOT, ".tts_cache"))
+    tts = M.TTS(cfg, os.path.join(ROOT, ".tts_cache"))
     lesson = M.Lesson(cfg, tts)
     rn, rr = lesson.rn, lesson.rr
 
     def audio(text, rate):
         tts.pending.add((text, rate))
-        return "audio/" + os.path.basename(tts.path(text, rate))
+        return "audio/" + os.path.splitext(os.path.basename(tts.path(text, rate)))[0] + ".mp3"
 
     def R(text):  # уншлагын хурдаар
         return audio(text, rr)
@@ -85,11 +85,16 @@ def build_lesson(path):
 
     tts.generate_all()
     os.makedirs(os.path.join(SITE, "audio"), exist_ok=True)
+    used = set()
     for text, rate in tts.pending:
         src = tts.path(text, rate)
-        dst = os.path.join(SITE, "audio", os.path.basename(src))
+        dst = os.path.join(SITE, "audio", os.path.splitext(os.path.basename(src))[0] + ".mp3")
         if not os.path.exists(dst):
-            shutil.copy2(src, dst)
+            if src.endswith(".mp3"):
+                shutil.copy2(src, dst)
+            else:  # Chimege WAV -> вэбэд хөнгөн MP3
+                subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-ac", "1", "-b:a", "64k", dst], check=True)
+        used.add(os.path.basename(dst))
     vid = os.path.join(ROOT, "videos", name + ".mp4")
     if os.path.exists(vid):
         os.makedirs(os.path.join(SITE, "videos"), exist_ok=True)
@@ -100,11 +105,19 @@ def build_lesson(path):
         os.makedirs(os.path.join(SITE, "img"), exist_ok=True)
         shutil.copy2(thumb, os.path.join(SITE, "img", name + ".png"))
         data["poster"] = f"img/{name}.png"
+    data["_audio"] = sorted(used)
     return data
 
 
 def main():
     lessons = [build_lesson(p) for p in sorted(glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True))]
+    used = set()
+    for d in lessons:
+        used.update(d.pop("_audio"))
+    adir = os.path.join(SITE, "audio")
+    stale = [f for f in os.listdir(adir) if f not in used]
+    for f in stale:   # хэрэглэгдэхээ больсон хуучин дуу
+        os.remove(os.path.join(adir, f))
     lessons.sort(key=lambda d: (d["grade"], d["subject"], d["number"] or 0))
     os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
     with open(os.path.join(SITE, "data", "lessons.js"), "w", encoding="utf-8") as f:

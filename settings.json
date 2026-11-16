@@ -1,0 +1,10 @@
+{
+  "tts_provider": "chimege",
+  "chimege": {
+    "voice": "FEMALE4v2",
+    "pitch": 1.05,
+    "speed_narration": 1.0,
+    "speed_reading": 0.85
+  },
+  "music_volume": 0.16
+}

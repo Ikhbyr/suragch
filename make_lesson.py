@@ -103,15 +103,71 @@ def load_audio(path):
     return a
 
 
+CHIMEGE_URL = "https://api.chimege.com/v1.2/synthesize"
+CHIMEGE_VOICES = ["FEMALE1v2", "FEMALE2v2", "FEMALE3v2", "FEMALE4v2", "FEMALE5v2",
+                  "MALE1v2", "MALE2v2", "MALE3v2", "MALE4v2"]
+
+
+def load_chimege_token():
+    """Токеныг CHIMEGE_TOKEN орчны хувьсагч эсвэл .chimege_token файлаас уншина (git-д орохгүй)."""
+    tok = os.environ.get("CHIMEGE_TOKEN", "").strip()
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".chimege_token")
+    if not tok and os.path.exists(p):
+        with open(p, encoding="utf-8") as f:
+            tok = f.read().strip()
+    if not tok:
+        sys.exit("Chimege токен олдсонгүй. .chimege_token файлд токеноо хадгална уу.")
+    return tok
+
+
 class TTS:
-    def __init__(self, voice, cache_dir):
-        self.voice, self.cache = voice, cache_dir
+    """Дуу үүсгэгч. cfg["tts_provider"]: "chimege" эсвэл "edge" (Microsoft)."""
+
+    def __init__(self, cfg, cache_dir):
+        self.provider = cfg.get("tts_provider", "edge")
+        self.cache = cache_dir
         os.makedirs(cache_dir, exist_ok=True)
         self.pending, self.mem, self.collect = set(), {}, True
+        if self.provider == "chimege":
+            c = cfg.get("chimege", {})
+            self.voice = c.get("voice", "FEMALE3v2")
+            self.pitch = c.get("pitch", 1.0)
+            self.rn = f"speed={c.get('speed_narration', 1.0)}"
+            self.rr = f"speed={c.get('speed_reading', 0.85)}"
+            self.token = None
+        else:
+            self.voice = cfg.get("voice", "mn-MN-YesuiNeural")
+            self.rn = cfg.get("rate_narration", "-5%")
+            self.rr = cfg.get("rate_reading", "-20%")
 
     def path(self, text, rate):
+        if self.provider == "chimege":
+            key = f"chimege|{self.voice}|{self.pitch}|{rate}|{text}"
+            return os.path.join(self.cache, hashlib.sha1(key.encode()).hexdigest()[:16] + ".wav")
         h = hashlib.sha1(f"{self.voice}|{rate}|{text}".encode()).hexdigest()[:16]
         return os.path.join(self.cache, h + ".mp3")
+
+    def _chimege_fetch(self, text, rate, out):
+        import urllib.request
+        import urllib.error
+        headers = {"Content-Type": "plain/text", "Token": self.token, "voice-id": self.voice,
+                   "speed": rate.split("=")[1], "pitch": str(self.pitch), "sample-rate": "22050"}
+        req = urllib.request.Request(CHIMEGE_URL, data=text.encode("utf-8"), headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = r.read()
+        except urllib.error.HTTPError as e:
+            body = e.read()[:200].decode("utf-8", "replace")
+            if e.code == 403:
+                raise SystemExit(f"Chimege: токен буруу эсвэл эрх дууссан (403). {body}")
+            if e.code == 400:
+                raise SystemExit(f"Chimege: бичвэрийн алдаа (400) {text!r}: {body}")
+            raise
+        if not data.startswith(b"RIFF"):
+            raise RuntimeError(f"Chimege: WAV биш хариу ирлээ: {data[:120]!r}")
+        with open(out + ".tmp", "wb") as f:
+            f.write(data)
+        os.replace(out + ".tmp", out)
 
     def get(self, text, rate):
         if self.collect:
@@ -130,19 +186,34 @@ class TTS:
             err = None
             for attempt in range(5):
                 try:
-                    await edge_tts.Communicate(text, self.voice, rate=rate).save(p + ".tmp")
-                    os.replace(p + ".tmp", p)
+                    if self.provider == "chimege":
+                        await asyncio.to_thread(self._chimege_fetch, text, rate, p)
+                    else:
+                        await edge_tts.Communicate(text, self.voice, rate=rate).save(p + ".tmp")
+                        os.replace(p + ".tmp", p)
                     return
-                except Exception as e:  # сүлжээний түр алдаа
+                except SystemExit:
+                    raise
+                except Exception as e:  # сүлжээний түр алдаа, серверийн ачаалал (503)
                     err = e
-                    await asyncio.sleep(1 + attempt)
+                    await asyncio.sleep(2 + 2 * attempt)
             raise RuntimeError(f"TTS амжилтгүй: {text!r}: {err}")
 
     def generate_all(self):
+        todo = [(t, r) for t, r in sorted(self.pending)
+                if not (os.path.exists(self.path(t, r)) and os.path.getsize(self.path(t, r)) > 0)]
+        if self.provider == "chimege" and todo:
+            self.token = self.token or load_chimege_token()
+            calls = sum(max(1, -(-len(t) // 200)) for t, _ in todo)
+            print(f"Chimege: {len(todo)} шинэ дуу, ойролцоогоор {calls} дуудалт ({calls * 8}₮)")
+            too_long = [t for t, _ in todo if len(t) > 200]
+            if too_long:
+                sys.exit(f"Chimege: 200 тэмдэгтээс урт бичвэр байна: {too_long[0]!r}")
+
         async def run():
-            sem = asyncio.Semaphore(6)
-            await asyncio.gather(*(self._gen(t, r, sem) for t, r in sorted(self.pending)))
-        print(f"Дуу бэлтгэж байна: {len(self.pending)} хэсэг...")
+            sem = asyncio.Semaphore(3 if self.provider == "chimege" else 6)
+            await asyncio.gather(*(self._gen(t, r, sem) for t, r in todo))
+        print(f"Дуу бэлтгэж байна: {len(self.pending)} хэсэг ({len(todo)} шинэ)...")
         asyncio.run(run())
         self.collect = False
 
@@ -322,7 +393,7 @@ class Lesson:
         self.cfg, self.tts = cfg, tts
         self.letters = cfg["letters"]
         self.new = cfg.get("new_letters", "")
-        self.rn, self.rr = cfg.get("rate_narration", "-5%"), cfg.get("rate_reading", "-20%")
+        self.rn, self.rr = tts.rn, tts.rr
         self.tl = Timeline()
         self.chapters = [(0.0, "Эхлэл")]
 
@@ -706,6 +777,18 @@ def draw_overlay(fr, d, section, letters, new):
 
 # ----------------------------------------------------------------- шалгалт, гаргалт
 
+def load_cfg(cfg_path):
+    """settings.json (хоолой, хөгжим гэх мэт нийтлэг тохиргоо) + хичээлийн JSON. Хичээлийнх нь давуу."""
+    base = {}
+    sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
+    if os.path.exists(sp):
+        with open(sp, encoding="utf-8") as f:
+            base = json.load(f)
+    with open(cfg_path, encoding="utf-8") as f:
+        cfg = json.load(f)
+    return {**base, **cfg}
+
+
 def lesson_id(cfg_path):
     """lessons/ хавтсаас харьцангуй замаар давтагдашгүй нэр: lessons/1/mongol/h07.json -> 1-mongol-h07"""
     base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lessons")
@@ -728,7 +811,87 @@ def validate(cfg):
         sys.exit("Уншуулах текстэд үзээгүй үсэг орсон байна:\n" + "\n".join(bad))
 
 
-def write_wav(tl, path):
+def _midi(m):
+    return 440.0 * 2 ** ((m - 69) / 12)
+
+
+def make_music(seconds, bpm=100):
+    """Хүүхдэд зориулсан хөгжилтэй арын ая (өөрөө нийлэгжүүлсэн, зохиогчийн эрхгүй).
+    I-V-vi-IV (C-G-Am-F) хөг, маримба маягийн арпеджио, зөөлөн басс, шажигнуур, хонхон аялгуу."""
+    beat = 60.0 / bpm
+    bar = 4 * beat
+    n = int((seconds + 2) * SR)
+    out = np.zeros(n, np.float32)
+    rng = np.random.default_rng(5)
+
+    def add(t0, sig):
+        i = int(t0 * SR)
+        if i >= n:
+            return
+        j = min(n, i + len(sig))
+        out[i:j] += sig[:j - i]
+
+    def marimba(f, dur, amp):
+        t = _t(dur)
+        env = np.exp(-t * 7) * (1 - np.exp(-t * 300))
+        return (amp * env * (np.sin(2 * np.pi * f * t) + 0.25 * np.sin(2 * np.pi * 4 * f * t) * np.exp(-t * 20))).astype(np.float32)
+
+    def bell(f, dur, amp):
+        t = _t(dur)
+        env = np.exp(-t * 3.5) * (1 - np.exp(-t * 400))
+        return (amp * env * (np.sin(2 * np.pi * f * t) + 0.4 * np.sin(2 * np.pi * 2.76 * f * t) * np.exp(-t * 6))).astype(np.float32)
+
+    def bass(f, dur, amp):
+        t = _t(dur)
+        env = np.minimum(1, t * 40) * np.exp(-t * 2.5)
+        return (amp * env * np.sin(2 * np.pi * f * t)).astype(np.float32)
+
+    def shaker(amp):
+        t = _t(0.07)
+        noise = np.diff(rng.normal(size=len(t) + 1)).astype(np.float32)
+        return (amp * noise * np.exp(-t * 60)).astype(np.float32)
+
+    chords = [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]]   # C G Am F
+    arp = [0, 1, 2, 1, 0, 1, 2, 1]
+    melodies = [[76, 74, 72, 74], [74, 71, 67, 71], [72, 76, 79, 76], [77, 76, 74, 72]]
+    for b in range(int(seconds / bar) + 2):
+        ch = chords[b % 4]
+        t0 = b * bar
+        for k in (0, 2):
+            add(t0 + k * beat, bass(_midi(ch[0] - 24), beat * 1.8, 0.5))
+        for e in range(8):
+            add(t0 + e * beat / 2, marimba(_midi(ch[arp[e]]), 0.5, 0.16))
+            if e % 2 == 1:
+                add(t0 + e * beat / 2, shaker(0.05))
+        if (b // 4) % 2 == 1:   # 4 хэмнэл тутамд аялгуу орж ирнэ
+            for q, m in enumerate(melodies[b % 4]):
+                add(t0 + q * beat, bell(_midi(m), beat * 1.5, 0.10))
+    out = out[:int(seconds * SR)]
+    out /= float(np.max(np.abs(out))) or 1.0
+    fade = int(1.5 * SR)
+    out[:fade] *= np.linspace(0, 1, fade)
+    out[-fade:] *= np.linspace(1, 0, fade)
+    return out
+
+
+def duck(music, voice, depth=0.7, thr=0.04):
+    """Яриа гарах үед хөгжмийг намсгана (sidechain)."""
+    blk = SR // 100
+    nb = len(voice) // blk + 1
+    padded = np.zeros(nb * blk, np.float32)
+    padded[:len(voice)] = np.abs(voice)
+    env = padded.reshape(nb, blk).max(axis=1)
+    g = np.empty(nb, np.float32)
+    cur = 0.0
+    for i, e in enumerate(env):
+        target = min(1.0, e / thr)
+        cur = target if target > cur else cur * 0.97 + target * 0.03   # хурдан намсгаж, аажмаар өсгөнө
+        g[i] = 1 - depth * cur
+    gain = np.repeat(g, blk)[:len(music)]
+    return music * gain
+
+
+def write_wav(tl, path, music_vol=0.0):
     total = int((tl.t + 0.5) * SR)
     buf = np.zeros(total, np.float32)
     for at, s in tl.sounds:
@@ -736,7 +899,11 @@ def write_wav(tl, path):
         j = min(total, i + len(s))
         buf[i:j] += s[:j - i]
     peak = float(np.max(np.abs(buf))) or 1.0
-    buf *= min(1.0, 0.95 / peak)
+    buf *= min(1.0, 0.9 / peak)
+    if music_vol > 0:
+        buf += duck(make_music(total / SR), buf) * music_vol
+        peak = float(np.max(np.abs(buf))) or 1.0
+        buf *= min(1.0, 0.95 / peak)
     with wave.open(path, "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
@@ -850,18 +1017,44 @@ def write_youtube(cfg, chapters, name, root, bg):
     print("Thumbnail:", thumb)
 
 
+def voice_samples():
+    """Chimege-ийн бүх хоолойгоор жишээ бичлэг хийж samples/ хавтсанд хадгална."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    out = os.path.join(root, "samples")
+    os.makedirs(out, exist_ok=True)
+    text = "Сайн байна уу, хүүхдүүдээ! Ма. Мэ. Ам. Эмээ. Ийм сам."
+    for i, v in enumerate(CHIMEGE_VOICES, 1):
+        tts = TTS({"tts_provider": "chimege", "chimege": {"voice": v}}, os.path.join(root, ".tts_cache"))
+        tts.get(text, tts.rr)
+        tts.generate_all()
+        dst = os.path.join(out, f"{i}_{v}.mp3")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", tts.path(text, tts.rr), "-b:a", "96k", dst], check=True)
+        print(dst)
+    music = make_music(25.0) * 0.5
+    wav = os.path.join(out, "music_preview.wav")
+    with wave.open(wav, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(SR)
+        wf.writeframes((music * 32767).astype(np.int16).tobytes())
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", wav, "-b:a", "128k", wav[:-4] + ".mp3"], check=True)
+    os.remove(wav)
+    print(wav[:-4] + ".mp3")
+
+
 def main():
+    if "--voices" in sys.argv:
+        return voice_samples()
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     cfg_path = sys.argv[1]
     snap = "--snap" in sys.argv
     global WATERMARK
     WATERMARK = "--no-watermark" not in sys.argv
-    with open(cfg_path, encoding="utf-8") as f:
-        cfg = json.load(f)
+    cfg = load_cfg(cfg_path)
     validate(cfg)
     root = os.path.dirname(os.path.abspath(__file__))
-    tts = TTS(cfg.get("voice", "mn-MN-YesuiNeural"), os.path.join(root, ".tts_cache"))
+    tts = TTS(cfg, os.path.join(root, ".tts_cache"))
     Lesson(cfg, tts).build()          # 1-р алхам: хэрэгтэй дуунуудыг цуглуулна
     tts.generate_all()
     lesson = Lesson(cfg, tts)
@@ -896,7 +1089,7 @@ def main():
 
     wav = os.path.join(out_dir, f"{name}.wav")
     out = os.path.join(out_dir, f"{name}.mp4")
-    write_wav(tl, wav)
+    write_wav(tl, wav, music_vol=cfg.get("music_volume", 0.16))
     n = int(math.ceil(tl.t * FPS))
     cmd = ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
            "-r", str(FPS), "-i", "-", "-i", wav, "-c:v", "libx264", "-preset", "medium", "-crf", "20",

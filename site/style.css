@@ -1,0 +1,320 @@
+:root {
+  --cover: #2b67d8;
+  --cover-deep: #1f4fb0;
+  --paper: #fdfeff;
+  --rule: #cfe0f4;
+  --margin: #f3a0a0;
+  --ink: #1f2a55;
+  --ink-soft: #56608a;
+  --vowel: #d92b2b;
+  --cons: #1b5bcb;
+  --semi: #8c36aa;
+  --sun: #ffd84d;
+  --leaf: #3fa65a;
+  --leaf-soft: #d5f1d9;
+  --line: 44px;
+  --gutter: 76px;
+  --radius-tile: 18px;
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cover);
+  background-image: radial-gradient(rgba(255,255,255,.08) 1.5px, transparent 1.6px);
+  background-size: 18px 18px;
+  padding: 28px 16px 24px;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; border-radius: 12px; }
+
+/* ------------------------------------------------ дэвтрийн хуудас */
+.notebook {
+  position: relative;
+  max-width: 1040px;
+  margin: 0 auto;
+  background-color: var(--paper);
+  background-image: linear-gradient(to bottom, transparent calc(var(--line) - 2px), var(--rule) calc(var(--line) - 2px), var(--rule) var(--line));
+  background-size: 100% var(--line);
+  background-position: 0 30px;
+  border-radius: 10px 10px 14px 14px;
+  box-shadow: 0 2px 0 var(--cover-deep), 0 14px 0 -6px #e8eef8, 0 16px 0 -6px var(--cover-deep), 0 30px 40px rgba(10, 30, 80, .35);
+  padding: 58px 40px 48px calc(var(--gutter) + 26px);
+  min-height: 70vh;
+}
+/* улаан захын шугам */
+.notebook::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--gutter);
+  width: 2px;
+  background: var(--margin);
+}
+/* дээд талын пүрш */
+.notebook::after {
+  content: "";
+  position: absolute;
+  left: 24px; right: 24px; top: -14px;
+  height: 34px;
+  background:
+    radial-gradient(circle at 50% 70%, var(--cover) 0 6px, transparent 6.5px) 0 0 / 40px 34px repeat-x,
+    linear-gradient(90deg, transparent 15px, #b9c3d6 15px, #e9edf5 19px, #9aa6bd 25px, transparent 25px) 0 0 / 40px 22px repeat-x;
+  pointer-events: none;
+}
+
+.foot {
+  max-width: 1040px;
+  margin: 34px auto 0;
+  color: #e3ecff;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+}
+.foot p { max-width: 62ch; margin: 0 auto; }
+
+/* ------------------------------------------------ үсгийн өнгө */
+.v { color: var(--vowel); }
+.c { color: var(--cons); }
+.s { color: var(--semi); }
+.p { color: var(--ink); }
+
+/* ------------------------------------------------ нүүр */
+.hero { margin: 0 0 var(--line); }
+.hero h1 {
+  font-weight: 900;
+  font-size: clamp(44px, 8vw, 92px);
+  line-height: calc(var(--line) * 2);
+  margin: 0;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.hero h1 .tw { display: inline-block; }
+.hero p {
+  margin: 0;
+  font-size: 22px;
+  line-height: var(--line);
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.lesson-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--line); }
+.lesson-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  min-height: calc(var(--line) * 3);
+}
+.lesson-num {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--sun);
+  font-weight: 900; font-size: 34px;
+  box-shadow: inset 0 -5px 0 rgba(0,0,0,.12);
+}
+.lesson-letters { display: flex; flex-wrap: wrap; gap: 8px; }
+.lesson-letters .mini {
+  width: 52px; height: 58px;
+  display: grid; place-items: center;
+  font-weight: 900; font-size: 34px;
+  background: #fff;
+  border: 3px solid #e7dcc6;
+  border-radius: 12px;
+  box-shadow: 0 4px 0 #dfe6f1;
+}
+.mini.new { background: #fff1b8; border-color: #f1cf5b; }
+
+.btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-weight: 900;
+  font-size: 22px;
+  background: var(--leaf);
+  color: #fff;
+  box-shadow: 0 6px 0 #2c7d42;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: transform .08s, box-shadow .08s;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #2c7d42; }
+.btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 6px 0 #c9d3e4; border: 3px solid #dbe3f0; }
+.btn.ghost:active { box-shadow: 0 2px 0 #c9d3e4; }
+
+/* ------------------------------------------------ хичээлийн толгой */
+.lesson-head {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px;
+  margin-bottom: 18px;
+}
+.lesson-head h1 { margin: 0; font-size: 34px; font-weight: 900; line-height: var(--line); }
+.back { font-size: 18px; padding: 10px 20px; }
+
+/* дэвтрийн хавчуурга (табууд) */
+.tabs {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 0 0 calc(var(--line) - 8px);
+  padding: 0; list-style: none;
+}
+.tab {
+  border: 0;
+  padding: 10px 18px 12px;
+  border-radius: 16px;
+  font-weight: 900; font-size: 19px;
+  background: #eef3fb;
+  color: var(--ink-soft);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.06);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.tab[aria-selected="true"] { background: var(--tabc, var(--sun)); color: #fff; box-shadow: inset 0 -5px 0 rgba(0,0,0,.18); }
+.tab .ico { font-size: 22px; }
+
+.panel h2 {
+  font-size: 26px; font-weight: 900; margin: 0;
+  line-height: var(--line);
+}
+.hint { margin: 0 0 var(--line); font-weight: 700; font-size: 18px; line-height: var(--line); color: var(--ink-soft); }
+
+/* ------------------------------------------------ видео */
+.video-wrap {
+  position: relative; aspect-ratio: 16 / 9;
+  border-radius: 18px; overflow: hidden;
+  background: #000;
+  box-shadow: 0 10px 0 #dfe6f1;
+}
+.video-wrap iframe, .video-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* ------------------------------------------------ товч хавтан */
+.tile {
+  border: 3px solid #e7dcc6;
+  background: #fff;
+  border-radius: var(--radius-tile);
+  box-shadow: 0 6px 0 #dfe6f1;
+  font-weight: 900;
+  transition: transform .08s, box-shadow .08s, background-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tile:active { transform: translateY(4px); box-shadow: 0 2px 0 #dfe6f1; }
+.tile.playing { background: #fff6c9; border-color: #f1cf5b; }
+.tile.done { background: var(--leaf-soft); border-color: #9ad3a6; }
+
+.letter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
+.letter-card { display: grid; gap: 10px; }
+.letter-card .big { font-size: 96px; line-height: 1; padding: 22px 0 26px; position: relative; }
+.letter-card .big .badge {
+  position: absolute; top: -12px; right: -10px;
+  background: #ff5a5a; color: #fff; font-size: 15px; padding: 5px 12px; border-radius: 999px;
+  transform: rotate(6deg);
+}
+.letter-card .ex { font-size: 34px; padding: 8px 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.letter-card .ex .em { font-size: 36px; }
+.hl-letter { background: var(--sun); border-radius: 8px; padding: 0 2px; }
+
+.syl-group { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+.syl { font-size: 46px; min-width: 120px; padding: 12px 18px 16px; }
+
+/* үе бүтээгч */
+.builder { margin-top: var(--line); padding-top: 4px; }
+.slots { display: flex; align-items: center; gap: 14px; margin: 10px 0 22px; flex-wrap: wrap; }
+.slot {
+  width: 110px; height: 122px; border-radius: 20px;
+  border: 4px dashed #b8c6dc; background: rgba(255,255,255,.7);
+  display: grid; place-items: center; font-size: 72px; font-weight: 900;
+}
+.slot.filled { border-style: solid; border-color: #e7dcc6; background: #fff; }
+.slots .plus { font-size: 44px; font-weight: 900; color: var(--ink-soft); }
+.slots.ok .slot { background: var(--leaf-soft); border-color: #9ad3a6; }
+.slots.bad { animation: shake .4s; }
+.builder-msg { font-weight: 800; font-size: 20px; min-height: var(--line); line-height: var(--line); color: var(--ink-soft); }
+.keys { display: flex; flex-wrap: wrap; gap: 10px; }
+.key { width: 74px; height: 80px; font-size: 44px; }
+.key.clear { width: auto; padding: 0 20px; font-size: 20px; color: var(--ink-soft); }
+
+/* үг */
+.word-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; }
+.word-card { display: grid; gap: 4px; justify-items: center; padding: 16px 12px 18px; }
+.word-card .em { font-size: 64px; line-height: 1.1; min-height: 70px; }
+.word-card .em.none { opacity: 0; }
+.word { font-size: 60px; line-height: 1.15; }
+.word .sy { border-radius: 10px; padding: 0 1px; transition: background-color .15s; display: inline-block; border-bottom: 4px solid transparent; }
+.word .sy.on { background: var(--sun); }
+.word .sy.arc { border-bottom-color: #8b93b3; border-radius: 0 0 40px 40px / 0 0 18px 18px; }
+.word.all .sy { background: var(--leaf-soft); }
+.explain {
+  margin-top: 6px; border: 0; background: #eef3fb; border-radius: 999px;
+  padding: 6px 14px; font-weight: 800; font-size: 16px; color: var(--ink-soft);
+}
+
+.word-btn { border: 0; background: none; display: grid; justify-items: center; gap: 4px; width: 100%; padding: 0; font-weight: 900; }
+
+/* өгүүлбэр */
+.sentence { display: flex; align-items: center; gap: 18px; min-height: calc(var(--line) * 3); flex-wrap: wrap; margin-bottom: 10px; }
+.sentence .play { width: 74px; height: 74px; border-radius: 50%; font-size: 30px; flex: none; }
+.sentence .em { font-size: 54px; }
+.sw { border: 0; background: transparent; font-weight: 900; font-size: 58px; padding: 0 8px; border-radius: 14px; transition: background-color .15s; }
+.sw.on { background: var(--sun); }
+.sentence.all .sw { background: var(--leaf-soft); }
+
+/* тоглоом */
+.game { display: grid; justify-items: center; gap: 22px; text-align: center; padding-top: 6px; }
+.game .score { font-size: 26px; font-weight: 900; min-height: var(--line); letter-spacing: .1em; }
+.listen {
+  width: 150px; height: 150px; border-radius: 50%; border: 0;
+  background: var(--cover); color: #fff; font-size: 66px;
+  box-shadow: 0 8px 0 var(--cover-deep);
+}
+.listen:active { transform: translateY(5px); box-shadow: 0 3px 0 var(--cover-deep); }
+.listen.pulse { animation: pulse 1.2s ease-in-out 2; }
+.choices { display: grid; grid-template-columns: repeat(3, minmax(150px, 220px)); gap: 18px; }
+.choice { font-size: 54px; padding: 18px 10px 22px; }
+.choice.right { background: var(--leaf-soft); border-color: #66c07c; }
+.choice.wrong { animation: shake .4s; background: #ffe1e1; border-color: #f2a3a3; }
+.game .result { font-size: 34px; font-weight: 900; }
+.game .result .stars { font-size: 56px; display: block; letter-spacing: .1em; }
+
+@keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-9px); } 40%,80% { transform: translateX(9px); } }
+@keyframes pulse { 50% { transform: scale(1.08); } }
+@keyframes rise { from { transform: translateY(14px) scale(.9); opacity: 0; } }
+.hero h1 .tw { animation: rise .5s cubic-bezier(.2,1.4,.4,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ------------------------------------------------ гар утас */
+@media (max-width: 720px) {
+  :root { --gutter: 30px; --line: 38px; }
+  body { padding: 22px 8px 18px; }
+  .notebook { padding: 48px 14px 32px calc(var(--gutter) + 12px); }
+  .lesson-row { grid-template-columns: auto 1fr; }
+  .lesson-row .btn { grid-column: 1 / -1; justify-self: start; }
+  .lesson-num { width: 58px; height: 58px; font-size: 26px; }
+  .lesson-head .lesson-letters { display: none; }
+  .lesson-head h1 { font-size: 28px; }
+  .lesson-letters .mini { width: 42px; height: 48px; font-size: 28px; }
+  .tab { padding: 8px 12px 10px; font-size: 16px; }
+  .tab .lbl { display: none; }
+  .tab[aria-selected="true"] .lbl { display: inline; }
+  .letter-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .letter-card .big { font-size: 68px; }
+  .letter-card .ex { font-size: 26px; }
+  .syl { font-size: 36px; min-width: 88px; }
+  .word-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .word { font-size: 40px; }
+  .word-card .em { font-size: 46px; min-height: 52px; }
+  .sw { font-size: 40px; }
+  .sentence .play { width: 60px; height: 60px; font-size: 24px; }
+  .choices { grid-template-columns: 1fr; width: 100%; max-width: 280px; }
+  .game .result { font-size: 24px; }
+  .game .result .stars { font-size: 34px; letter-spacing: 0; }
+  .game .score { font-size: 20px; letter-spacing: 0; }
+  .slot { width: 84px; height: 96px; font-size: 56px; }
+  .key { width: 60px; height: 66px; font-size: 36px; }
+}

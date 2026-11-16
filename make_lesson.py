@@ -26,6 +26,7 @@ F_EMOJI = os.path.join(FD, "seguiemj.ttf")
 
 VOWELS = set("аэиоуөүыяеёю")
 SEMIVOWELS = set("й")
+DESCENDERS = set("руфдцщ")
 C_VOWEL = (222, 44, 44)      # эгшиг - улаан
 C_CONS = (28, 92, 205)       # гийгүүлэгч - хөх
 C_SEMI = (142, 58, 172)      # й - ягаан
@@ -259,13 +260,16 @@ def draw_word(d, word, cx, cy, size, hl=(), hl_color=C_HL, arcs=(), color=None, 
     x0 = cx - f.getlength(word) / 2
     xs = [x0 + f.getlength(word[:i]) for i in range(len(word) + 1)]
     pad = size * 0.07
+    desc = any(c in DESCENDERS for c in word)   # р, у гэх мэт доошоо унжсан үсэг
+    low = size * (0.30 if desc else 0.12)
     for s, e in hl:
-        d.rounded_rectangle([xs[s] - pad, base - xh * 1.9, xs[e] + pad, base + size * 0.12],
+        d.rounded_rectangle([xs[s] - pad, base - xh * 1.9, xs[e] + pad, base + low],
                             radius=int(size * 0.16), fill=hl_color)
     for i, ch in enumerate(word):
         d.text((xs[i], base), ch, font=f, fill=color or letter_color(ch), anchor="ls")
     for s, e in arcs:
-        d.arc([xs[s] + pad * 0.2, base - size * 0.10, xs[e] - pad * 0.2, base + size * 0.30],
+        sh = size * 0.16 if desc else 0
+        d.arc([xs[s] + pad * 0.2, base - size * 0.10 + sh, xs[e] - pad * 0.2, base + size * 0.30 + sh],
               15, 165, fill=(95, 95, 120), width=max(3, int(size / 28)))
 
 

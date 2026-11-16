@@ -1,5 +1,5 @@
 .tts_cache/
-videos/
+/videos/
 .claude/
 __pycache__/
 *.wav

@@ -103,12 +103,30 @@ def profile(path):
     im.save(path, optimize=True)
 
 
+def watermark(path):
+    """YouTube-ийн "Video watermark": тунгалаг дэвсгэртэй дөрвөлжин PNG (150x150-аас том)."""
+    S = 300
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([14, 14, S - 14, S - 14], 56, fill=COVER + (255,))
+    box = (34, 34, S - 34, S - 34)
+    d.rounded_rectangle(box, 40, fill=PAPER + (255,))
+    y = box[1] + 46
+    while y < box[3] - 30:
+        d.line([box[0] + 6, y, box[2] - 6, y], fill=RULE + (255,), width=4)
+        y += 46
+    d.line([78, box[1], 78, box[3]], fill=MARGIN + (255,), width=5)
+    M.draw_word(d, "Аа", S / 2 + 12, S / 2 + 4, 150)
+    im.save(path, optimize=True)
+
+
 def main():
     out = os.path.join(ROOT, "youtube")
     os.makedirs(out, exist_ok=True)
     banner(os.path.join(out, "channel_banner.png"))
     profile(os.path.join(out, "channel_profile.png"))
-    print("Бэлэн: youtube/channel_banner.png, youtube/channel_profile.png")
+    watermark(os.path.join(out, "channel_watermark.png"))
+    print("Бэлэн: youtube/channel_banner.png, channel_profile.png, channel_watermark.png")
 
 
 if __name__ == "__main__":

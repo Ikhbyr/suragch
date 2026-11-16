@@ -4,6 +4,7 @@
 Хэрэглээ:
     python make_lesson.py lessons/hicheel_07.json            # видео гаргана -> videos/
     python make_lesson.py lessons/hicheel_07.json --snap     # зөвхөн шалгах зураг (contact sheet)
+    python make_lesson.py lessons/hicheel_07.json --no-watermark   # буланд лого оруулахгүй
 
 Шинэ үсэг нэмэхдээ JSON файлыг хуулж, "letters", "new_letters", "letter_info",
 "words", "sentences", "quiz" хэсгийг шинэчилнэ. Уншуулах үг, өгүүлбэр нь зөвхөн
@@ -729,6 +730,26 @@ def write_wav(tl, path):
         wf.writeframes((buf * 32767).astype(np.int16).tobytes())
 
 
+WATERMARK = True
+
+
+@lru_cache(None)
+def watermark_img():
+    """Видеоны зүүн доод буланд байх жижиг лого (сувгийн нэр)."""
+    text = "Уншиж сурцгаая"
+    f = font(F_HEAD, 22)
+    tw = int(f.getlength(text))
+    w, h = 58 + tw + 20, 52
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, w - 1, h - 1], 26, fill=(255, 255, 255, 185))
+    d.rounded_rectangle([6, 6, 46, 46], 10, fill=(43, 103, 216, 255))
+    d.rounded_rectangle([9, 9, 43, 43], 8, fill=(253, 254, 255, 255))
+    draw_word(d, "Аа", 27, 27, 22)
+    d.text((56, h / 2), text, font=f, fill=(43, 103, 216, 235), anchor="lm")
+    return im
+
+
 def frame_at(tl, bg, starts, t, letters, new):
     k = max(0, bisect.bisect_right(starts, t) - 1)
     st, _, draw, overlay, section = tl.scenes[k]
@@ -737,6 +758,9 @@ def frame_at(tl, bg, starts, t, letters, new):
     draw(fr, d, t - st)
     if overlay:
         draw_overlay(fr, d, section, letters, new)
+    if WATERMARK:
+        wm = watermark_img()
+        fr.paste(wm, (20, H - wm.height - 18), wm)
     return fr
 
 
@@ -812,6 +836,8 @@ def main():
         sys.exit(__doc__)
     cfg_path = sys.argv[1]
     snap = "--snap" in sys.argv
+    global WATERMARK
+    WATERMARK = "--no-watermark" not in sys.argv
     with open(cfg_path, encoding="utf-8") as f:
         cfg = json.load(f)
     validate(cfg)

@@ -2,7 +2,8 @@
 window.LESSONS = [
  {
   "id": "hicheel_07",
-  "subject": "reading",
+  "subject": "mongol",
+  "type": "reading",
   "grade": 1,
   "number": 7,
   "title": "Уншиж сурцгаая!",

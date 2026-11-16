@@ -24,7 +24,7 @@ def build_lesson(path):
     with open(path, encoding="utf-8") as f:
         cfg = json.load(f)
     M.validate(cfg)
-    name = os.path.splitext(os.path.basename(path))[0]
+    name = M.lesson_id(path)
     tts = M.TTS(cfg.get("voice", "mn-MN-YesuiNeural"), os.path.join(ROOT, ".tts_cache"))
     lesson = M.Lesson(cfg, tts)
     rn, rr = lesson.rn, lesson.rr
@@ -43,7 +43,8 @@ def build_lesson(path):
     info = cfg.get("letter_info", {})
     data = {
         "id": name,
-        "subject": cfg.get("subject", "reading"),
+        "subject": cfg.get("subject", "mongol"),
+        "type": cfg.get("type", "reading"),
         "grade": cfg.get("grade", 1),
         "number": cfg.get("lesson_number"),
         "title": cfg.get("title", "Уншиж сурцгаая!"),
@@ -103,7 +104,7 @@ def build_lesson(path):
 
 
 def main():
-    lessons = [build_lesson(p) for p in sorted(glob.glob(os.path.join(ROOT, "lessons", "*.json")))]
+    lessons = [build_lesson(p) for p in sorted(glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True))]
     lessons.sort(key=lambda d: (d["grade"], d["subject"], d["number"] or 0))
     os.makedirs(os.path.join(SITE, "data"), exist_ok=True)
     with open(os.path.join(SITE, "data", "lessons.js"), "w", encoding="utf-8") as f:

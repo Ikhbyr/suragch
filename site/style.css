@@ -149,20 +149,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn.ghost { background: #fff; color: var(--ink); box-shadow: 0 6px 0 #c9d3e4; border: 3px solid #dbe3f0; }
 .btn.ghost:active { box-shadow: 0 2px 0 #c9d3e4; }
 
-/* анги, хичээлийн бүлэг */
-.grade { margin-bottom: var(--line); }
-.grade-title {
-  display: inline-block;
-  margin: 0 0 8px;
-  padding: 0 22px;
-  font-size: 30px; font-weight: 900;
-  line-height: var(--line);
-  background: var(--sun);
-  border-radius: 999px;
-  box-shadow: inset 0 -4px 0 rgba(0,0,0,.1);
+/* анги сонгох, хичээлийн бүлэг */
+.sec-title { margin: 0; font-size: 26px; font-weight: 900; line-height: var(--line); }
+.grade-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 8px 0 var(--line); }
+.grade-card {
+  display: grid; justify-items: center; align-content: center; gap: 2px;
+  padding: 16px 8px 18px;
+  text-decoration: none; color: var(--ink);
+  background: #fff; border: 3px solid #e7dcc6; border-radius: 22px;
+  box-shadow: 0 6px 0 #dfe6f1;
+  transition: transform .08s, box-shadow .08s;
 }
-.subject h3 { margin: 0; font-size: 23px; font-weight: 900; line-height: var(--line); }
-.subject .lesson-list { margin-bottom: 6px; }
+.grade-card:active { transform: translateY(4px); box-shadow: 0 2px 0 #dfe6f1; }
+.grade-card .gnum { font-size: 66px; font-weight: 900; line-height: 1; color: var(--gc); }
+.grade-card .glbl { font-size: 20px; font-weight: 900; }
+.grade-card .gcount { font-size: 15px; font-weight: 800; color: var(--ink-soft); }
+.grade-card.empty .gnum { opacity: .4; }
+.subject { margin-bottom: var(--line); }
+.subject-title { margin: 0 0 6px; font-size: 26px; font-weight: 900; line-height: var(--line); }
+.lesson-row small { display: block; margin-top: 8px; font-size: 15px; font-weight: 800; color: var(--ink-soft); }
+.lesson-title { font-size: 24px; font-weight: 900; }
 .soon { margin: 0; font-weight: 700; font-size: 18px; line-height: var(--line); color: var(--ink-soft); }
 
 /* ------------------------------------------------ хичээлийн толгой */
@@ -314,6 +320,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .lesson-row .btn { grid-column: 1 / -1; justify-self: start; }
   .lesson-num { width: 58px; height: 58px; font-size: 26px; }
   .lesson-head .lesson-letters { display: none; }
+  .grade-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .grade-card .gnum { font-size: 48px; }
+  .grade-card .glbl { font-size: 16px; }
   .lesson-head h1 { font-size: 28px; }
   .lesson-letters .mini { width: 42px; height: 48px; font-size: 28px; }
   .tab { padding: 8px 12px 10px; font-size: 16px; }

@@ -702,6 +702,15 @@ def draw_overlay(fr, d, section, letters, new):
 
 # ----------------------------------------------------------------- шалгалт, гаргалт
 
+def lesson_id(cfg_path):
+    """lessons/ хавтсаас харьцангуй замаар давтагдашгүй нэр: lessons/1/mongol/h07.json -> 1-mongol-h07"""
+    base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lessons")
+    rel = os.path.relpath(os.path.abspath(cfg_path), base)
+    if rel.startswith(".."):
+        rel = os.path.basename(cfg_path)
+    return os.path.splitext(rel)[0].replace("\\", "-").replace("/", "-")
+
+
 def validate(cfg):
     ok = set(cfg["letters"])
     bad = []
@@ -856,7 +865,7 @@ def main():
     letters, new = cfg["letters"], cfg.get("new_letters", "")
     bg = make_bg()
     starts = [s[0] for s in tl.scenes]
-    name = os.path.splitext(os.path.basename(cfg_path))[0]
+    name = lesson_id(cfg_path)
     out_dir = os.path.join(root, "videos")
     os.makedirs(out_dir, exist_ok=True)
     print(f"Үргэлжлэх хугацаа: {int(tl.t // 60)}:{int(tl.t % 60):02d}, {len(tl.scenes)} үзэгдэл")

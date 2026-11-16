@@ -97,60 +97,91 @@
   ];
 
   const BRAND = "Сурагч";
-  const GRADES = [1, 2, 3];
+  // Бага анги: 1-5. Шинэ хичээл нэмэхдээ доорх жагсаалтад нэмнэ (түлхүүр нь JSON-ийн "subject").
+  const GRADES = [1, 2, 3, 4, 5];
+  const GRADE_COLORS = ["#d92b2b", "#ef8a2a", "#3fa65a", "#2b67d8", "#8c36aa"];
   const SUBJECTS = [
-    ["reading", "📖", "Уншлага"],
+    ["mongol", "📖", "Монгол хэл"],
     ["math", "🔢", "Математик"],
+    ["orchin", "🌱", "Хүн ба орчин"],
+    ["baigal", "🔬", "Хүн ба байгаль"],
+    ["niigem", "🏛️", "Хүн ба нийгэм"],
+    ["english", "🇬🇧", "Англи хэл"],
+    ["art", "🎨", "Дүрслэх урлаг, технологи"],
+    ["music", "🎵", "Хөгжим"],
+    ["pe", "⚽", "Биеийн тамир"],
   ];
-  const subjectName = (k) => (SUBJECTS.find((s) => s[0] === k) || [k, "", k])[2];
+  const subjectOf = (k) => SUBJECTS.find((s) => s[0] === k) || [k, "📘", k];
+  const subjectName = (k) => subjectOf(k)[2];
 
   function route() {
     stopAll();
     const [id, tab] = location.hash.replace(/^#\/?/, "").split("/");
     const lesson = LESSONS.find((l) => l.id === id);
-    if (lesson) lessonView(lesson, TABS.some((t) => t[0] === tab) ? tab : "video");
+    if (id === "g" && GRADES.includes(Number(tab))) gradeView(Number(tab));
+    else if (lesson) lessonView(lesson, TABS.some((t) => t[0] === tab) ? tab : "video");
     else home();
     window.scrollTo(0, 0);
   }
   window.addEventListener("hashchange", route);
 
   // ------------------------------------------------ нүүр
-  function lessonRow(l) {
+  function lessonRow(l, showPlace) {
+    const body = l.letters
+      ? `<div class="lesson-letters" aria-label="Үсгүүд: ${[...l.letters].join(", ")}">
+          ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
+        </div>`
+      : `<div class="lesson-title">${esc(l.title || "")}</div>`;
     return `
       <li class="lesson-row">
         <span class="lesson-num" aria-hidden="true">${l.number}</span>
-        <div>
-          <div class="lesson-letters" aria-label="Үсгүүд: ${[...l.letters].join(", ")}">
-            ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
-          </div>
-        </div>
+        <div>${body}${showPlace ? `<small>${l.grade}-р анги, ${subjectName(l.subject)}</small>` : ""}</div>
         <a class="btn" href="#/${l.id}">▶ ${l.number}-р хичээл</a>
       </li>`;
   }
 
   function home() {
-    document.title = `${BRAND} | 1–3-р ангийн хичээл`;
+    document.title = `${BRAND} | Бага ангийн хичээл`;
     const h1 = [...BRAND].map((ch, i) =>
       `<span class="tw ${cls(ch)}" style="animation-delay:${i * 60}ms">${esc(ch)}</span>`).join("");
+    const latest = LESSONS.slice().reverse().slice(0, 5);
     app.innerHTML = `
       <header class="hero">
         <h1 aria-label="${BRAND}">${h1}</h1>
-        <p>1–3-р ангийн хүүхдэд зориулсан хичээлүүд</p>
+        <p>Бага ангийн хүүхдэд зориулсан хичээлүүд</p>
       </header>
-      ${GRADES.map((g) => {
-        const inGrade = LESSONS.filter((l) => l.grade === g);
-        return `<section class="grade" aria-labelledby="g${g}">
-          <h2 class="grade-title" id="g${g}">${g}-р анги</h2>
-          ${inGrade.length ? SUBJECTS.map(([k, ico, name]) => {
-            const list = inGrade.filter((l) => l.subject === k);
-            return `<div class="subject">
-              <h3><span aria-hidden="true">${ico}</span> ${name}</h3>
-              ${list.length ? `<ol class="lesson-list">${list.map(lessonRow).join("")}</ol>`
-                : `<p class="soon">Удахгүй нэмэгдэнэ.</p>`}
-            </div>`;
-          }).join("") : `<p class="soon">Хичээлүүд удахгүй нэмэгдэнэ.</p>`}
+      <h2 class="sec-title">Ангиа сонгоорой</h2>
+      <nav class="grade-grid" aria-label="Ангиуд">
+        ${GRADES.map((g, i) => {
+          const n = LESSONS.filter((l) => l.grade === g).length;
+          return `<a class="grade-card${n ? "" : " empty"}" href="#/g/${g}" style="--gc:${GRADE_COLORS[i]}">
+            <span class="gnum">${g}</span><span class="glbl">-р анги</span>
+            <span class="gcount">${n ? `${n} хичээл` : "Удахгүй"}</span>
+          </a>`;
+        }).join("")}
+      </nav>
+      ${latest.length ? `<h2 class="sec-title">Шинэ хичээлүүд</h2>
+        <ol class="lesson-list">${latest.map((l) => lessonRow(l, true)).join("")}</ol>` : ""}`;
+  }
+
+  function gradeView(g) {
+    document.title = `${g}-р анги | ${BRAND}`;
+    const inGrade = LESSONS.filter((l) => l.grade === g);
+    const keys = [...new Set([...SUBJECTS.map((s) => s[0]), ...inGrade.map((l) => l.subject)])]
+      .filter((k) => inGrade.some((l) => l.subject === k));
+    app.innerHTML = `
+      <div class="lesson-head">
+        <a class="btn ghost back" href="#/">← Нүүр</a>
+        <h1>${g}-р анги</h1>
+      </div>
+      ${keys.map((k) => {
+        const [, ico, name] = subjectOf(k);
+        return `<section class="subject">
+          <h2 class="subject-title"><span aria-hidden="true">${ico}</span> ${name}</h2>
+          <ol class="lesson-list">${inGrade.filter((l) => l.subject === k).map((l) => lessonRow(l)).join("")}</ol>
         </section>`;
-      }).join("")}`;
+      }).join("")}
+      <p class="soon">${keys.length ? "Бусад хичээлүүд удахгүй нэмэгдэнэ." : "Энэ ангийн хичээлүүд удахгүй нэмэгдэнэ."}</p>`;
   }
 
   // ------------------------------------------------ хичээл
@@ -158,7 +189,7 @@
     document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${[...l.letters].join(" ")} | ${BRAND}`;
     app.innerHTML = `
       <div class="lesson-head">
-        <a class="btn ghost back" href="#/">← Нүүр</a>
+        <a class="btn ghost back" href="#/g/${l.grade}">← ${l.grade}-р анги</a>
         <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}</small></h1>
         <div class="lesson-letters" aria-label="Үсгүүд">
           ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}

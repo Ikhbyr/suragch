@@ -105,7 +105,11 @@ def playlist_title(cfg):
     if cfg.get("playlist"):
         return cfg["playlist"]
     subj = SUBJECTS.get(cfg.get("subject", "mongol"), cfg.get("subject", ""))
-    return f"{cfg.get('grade', 1)}-р анги, {subj}: {cfg.get('title', 'Уншиж сурцгаая!')}"
+    return f"{cfg.get('grade', 1)}-р анги {subj.lower()}"   # жишээ: "1-р анги монгол хэл"
+
+
+def norm(title):
+    return re.sub(r"[^\w]+", " ", title.lower()).strip()
 
 
 def set_youtube_id(path, vid):
@@ -170,24 +174,31 @@ def find_or_create_playlist(yt, title):
     while req:
         resp = req.execute()
         for p in resp.get("items", []):
-            if p["snippet"]["title"].strip() == title:
-                return p["id"]
+            if norm(p["snippet"]["title"]) == norm(title):
+                return p["id"], False
         req = yt.playlists().list_next(req, resp)
     print(f"  Шинэ playlist үүсгэж байна: {title}")
     body = {"snippet": {"title": title, "description":
                         f"{title}. Хичээлүүд дугаарын дарааллаараа.\n\n" + "\n".join(M.DESC_LINKS),
                         "defaultLanguage": "mn"},
             "status": {"privacyStatus": "public"}}
-    return yt.playlists().insert(part="snippet,status", body=body).execute()["id"]
+    return yt.playlists().insert(part="snippet,status", body=body).execute()["id"], True
 
 
-def playlist_items(yt, pid):
-    items, req = [], yt.playlistItems().list(part="snippet", playlistId=pid, maxResults=50)
-    while req:
-        resp = req.execute()
-        items += resp.get("items", [])
-        req = yt.playlistItems().list_next(req, resp)
-    return items
+def playlist_items(yt, pid, new=False):
+    from googleapiclient.errors import HttpError
+    for attempt in range(6):
+        try:
+            items, req = [], yt.playlistItems().list(part="snippet", playlistId=pid, maxResults=50)
+            while req:
+                resp = req.execute()
+                items += resp.get("items", [])
+                req = yt.playlistItems().list_next(req, resp)
+            return items
+        except HttpError as e:   # шинэ playlist хэдэн секундийн дараа л харагддаг
+            if e.resp.status != 404 or not new or attempt == 5:
+                raise
+            time.sleep(3)
 
 
 def sync_playlists(yt):
@@ -198,11 +209,11 @@ def sync_playlists(yt):
         if cfg.get("youtube_id"):
             groups.setdefault(playlist_title(cfg), []).append((cfg.get("lesson_number") or 0, cfg["youtube_id"]))
     for title, lessons in groups.items():
-        pid = find_or_create_playlist(yt, title)
+        pid, new = find_or_create_playlist(yt, title)
         want = [v for _, v in sorted(lessons)]
         changed = 0
         for pos, vid in enumerate(want):
-            items = playlist_items(yt, pid)
+            items = playlist_items(yt, pid, new)
             cur = next((it for it in items if it["snippet"]["resourceId"]["videoId"] == vid), None)
             if cur is None:
                 yt.playlistItems().insert(part="snippet", body={"snippet": {

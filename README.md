@@ -41,7 +41,25 @@ python make_lesson.py lessons/hicheel_08.json --youtube  # YouTube-ийн мэд
 python build_site.py                                     # сайтыг шинэчилнэ
 ```
 
-## YouTube-д байршуулах
+Эсвэл нэг командаар бүгдийг нь хийнэ (доорх «YouTube автомат нийтлэл»).
+
+## YouTube автомат нийтлэл
+
+```
+python publish.py lessons/hicheel_09.json   # видео үүсгэх → YouTube → thumbnail → playlist → сайт → push
+python publish.py --sync                    # зөвхөн playlist-ийн дарааллыг засна
+```
+
+- Хичээлүүд «1-р анги монгол хэл» гэх мэт анги + хичээлийн playlist-д дугаарын дарааллаар орно.
+  Тийм нэртэй playlist байхгүй бол скрипт шинээр үүсгэнэ.
+- Google API аудит хийгдээгүй бол бичлэг **Private** болж түгжигдэнэ. Тэгвэл скриптийн хэвлэсэн
+  Studio линкээр ороод **Public** болгоно.
+- Нэвтрэлт: `client_secret.json` (Google Cloud → Google Auth Platform → Clients → Desktop app)
+  болон `.youtube_token.json`. Хоёулаа git-д орохгүй. Токен хүчингүй болбол скрипт хөтөч нээж
+  дахин нэвтрүүлнэ.
+- Шаардлагатай сан: `python -m pip install --user google-api-python-client google-auth-oauthlib`
+
+## YouTube-д гараар байршуулах
 
 1. https://studio.youtube.com → **Create → Upload videos** → `videos/hicheel_07.mp4`
 2. Гарчиг, тайлбар, шошгыг `youtube/hicheel_07_youtube.txt` файлаас хуулна.

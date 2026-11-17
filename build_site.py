@@ -211,7 +211,24 @@ def main():
         f.write("window.LESSONS = ")
         json.dump(lessons, f, ensure_ascii=False, indent=1)
         f.write(";\n")
+    stamp_assets()
     print(f"Бэлэн: {len(lessons)} хичээл -> site/")
+
+
+def stamp_assets():
+    """index.html дахь css/js холбоосонд агуулгын хэш (?v=...) нэмнэ: хөтөч хуучин хуулбар ашиглахгүй."""
+    import hashlib
+    import re
+    page = os.path.join(SITE, "index.html")
+    html = open(page, encoding="utf-8").read()
+
+    def repl(m):
+        path = os.path.join(SITE, m.group(2))
+        h = hashlib.sha1(open(path, "rb").read()).hexdigest()[:10]
+        return f'{m.group(1)}="{m.group(2)}?v={h}"'
+    new = re.sub(r'(href|src)="((?:style\.css|app\.js|data/lessons\.js|data/support\.js))(?:\?v=[0-9a-f]+)?"', repl, html)
+    if new != html:
+        open(page, "w", encoding="utf-8").write(new)
 
 
 if __name__ == "__main__":

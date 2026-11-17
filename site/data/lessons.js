@@ -1677,7 +1677,7 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_01.png",
-  "added": 1794910531
+  "added": 1794910855
  },
  {
   "id": "hicheel_02",
@@ -1784,7 +1784,7 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_02.png",
-  "added": 1794910531
+  "added": 1794910855
  },
  {
   "id": "hicheel_03",
@@ -1897,7 +1897,7 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_03.png",
-  "added": 1794910531
+  "added": 1794910855
  },
  {
   "id": "hicheel_04",
@@ -2049,7 +2049,7 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_04.png",
-  "added": 1794910531
+  "added": 1794910855
  },
  {
   "id": "hicheel_05",
@@ -2218,7 +2218,7 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_05.png",
-  "added": 1794910531
+  "added": 1794910855
  },
  {
   "id": "hicheel_06",

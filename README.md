@@ -43,6 +43,20 @@ python build_site.py                                     # сайтыг шинэ
 
 Эсвэл нэг командаар бүгдийг нь хийнэ (доорх «YouTube автомат нийтлэл»).
 
+## Математикийн хичээл
+
+`lessons/1/math/hicheel_NN.json` (`"type": "math"`). Хэсгүүд нь `sections[].items[]`-ээс бүрдэнэ:
+`number`, `count`, `howmany`, `sequence`, `missing`, `sign`, `compare`, `split`, `add`, `sub`, `expr`.
+Төрөл бүрийн тайлбар `make_math.py`-ийн эхэнд бий. Видео, сайт, YouTube нийтлэл уншлагын хичээлтэй адилхан:
+
+```
+python publish.py lessons/1/math/hicheel_01.json
+```
+
+Дуугүй урьдчилсан зураг (Chimege дуудахгүй): `TTS_DRY=1 python make_lesson.py lessons/1/math/hicheel_01.json --snap`
+
+Эцэг эхийн группт тавих зарын загвар: `zar/ezeg_ehchuudad.md`
+
 ## YouTube автомат нийтлэл
 
 ```

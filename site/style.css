@@ -99,6 +99,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .c { color: var(--cons); }
 .s { color: var(--semi); }
 .p { color: var(--ink); }
+.n { color: #ec6818; }
 
 /* ------------------------------------------------ нүүр */
 .hero { margin: 0 0 var(--line); }
@@ -146,6 +147,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 4px 0 #dfe6f1;
 }
 .mini.new { background: #fff1b8; border-color: #f1cf5b; }
+.lesson-letters .mini.wide { width: auto; padding: 0 10px; }
+.lesson-title + .lesson-letters { margin-top: 6px; }
 
 .btn {
   border: 0;
@@ -317,6 +320,35 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .game .result { font-size: 34px; font-weight: 900; }
 .game .result .stars { font-size: 56px; display: block; letter-spacing: .1em; }
 
+/* ------------------------------------------------ математик */
+.num-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; }
+.num-card { display: grid; justify-items: center; gap: 2px; padding: 14px 12px 18px; }
+.num-big { font-size: 110px; line-height: 1; }
+.num-word { font-size: 26px; color: var(--ink-soft); }
+.num-objs { min-height: 96px; display: grid; place-items: center; margin-top: 8px; }
+.objs { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; max-width: 250px; font-size: 38px; line-height: 1.15; }
+.ob { display: inline-block; border-radius: 50%; transition: transform .15s, background-color .15s; }
+.ob.on { background: #fff1b8; transform: scale(1.18); }
+.ob.gone { opacity: .25; filter: grayscale(1); }
+
+.prob-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.prob { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 14px 16px 18px; min-height: 104px; }
+.prob .em { font-size: 40px; }
+.expr { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; font-size: 46px; }
+.expr .op { color: var(--ink); padding: 0 2px; }
+.tok { min-width: 1.15em; text-align: center; }
+.tok.q, .tok.ok { min-width: 1.3em; padding: 0 8px; border-radius: 12px; }
+.tok.q { background: #fff1b8; color: #e24646; border: 3px dashed #f1cf5b; }
+.tok.ok { background: var(--leaf-soft); }
+.tok.sgn.ok, .tok.sgn { color: var(--ink); }
+.tok.q.sgn { color: #e24646; }
+
+.mgame .pic { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; min-height: 110px; }
+.mgame .pic .objs { font-size: 48px; max-width: 320px; }
+.mgame .pic .op { font-size: 54px; font-weight: 900; color: var(--ink); }
+.expr.big { font-size: 64px; }
+.choice.sym { color: var(--ink); }
+
 @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-9px); } 40%,80% { transform: translateX(9px); } }
 @keyframes pulse { 50% { transform: scale(1.08); } }
 @keyframes rise { from { transform: translateY(14px) scale(.9); opacity: 0; } }
@@ -347,6 +379,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .letter-card .big { font-size: 68px; }
   .letter-card .ex { font-size: 26px; }
   .syl { font-size: 36px; min-width: 88px; }
+  .num-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .num-big { font-size: 76px; }
+  .objs { font-size: 28px; }
+  .prob-list { grid-template-columns: 1fr; }
+  .expr { font-size: 38px; }
+  .expr.big { font-size: 48px; }
+  .mgame .pic .objs { font-size: 34px; max-width: 220px; }
   .word-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .word { font-size: 40px; }
   .word-card .em { font-size: 46px; min-height: 52px; }

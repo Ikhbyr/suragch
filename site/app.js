@@ -8,6 +8,7 @@
   // ------------------------------------------------ туслах
   const cls = (ch) => {
     const c = ch.toLowerCase();
+    if (/[0-9]/.test(c)) return "n";
     if (VOW.includes(c)) return "v";
     if (SEMI.includes(c)) return "s";
     if (/\p{L}/u.test(c)) return "c";
@@ -16,6 +17,13 @@
   const esc = (s) => s.replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
   const colorize = (text, hl) =>
     [...text].map((ch) => `<span class="${cls(ch)}${hl && ch.toLowerCase() === hl ? " hl-letter" : ""}">${esc(ch)}</span>`).join("");
+  // хичээлийн жижиг хавтангууд: уншлагад үсэг, математикт тоо/тэмдэг
+  const chipsOf = (l) => (l.type === "math" ? l.chips : [...l.letters]);
+  const isNewChip = (l, tk) => (l.type === "math" ? l.new_chips.includes(tk) : l.new.includes(tk));
+  const chipRow = (l, label) => `<div class="lesson-letters" aria-label="${label}">
+      ${chipsOf(l).map((ch) => `<span class="mini${isNewChip(l, ch) ? " new" : ""}${ch.length > 1 ? " wide" : ""}">${colorize(ch)}</span>`).join("")}
+    </div>`;
+  const tabsOf = (l) => (l.type === "math" ? MATH_TABS.filter((t) => t[0] !== "nums" || l.nums.length) : TABS);
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const $ = (sel, root = app) => root.querySelector(sel);
   const $$ = (sel, root = app) => [...root.querySelectorAll(sel)];
@@ -95,6 +103,12 @@
     ["sent", "📝", "Өгүүлбэр", "#8c36aa"],
     ["game", "🎮", "Тоглоом", "#dd4479"],
   ];
+  const MATH_TABS = [
+    ["video", "🎬", "Видео", "#e8534a"],
+    ["nums", "🔢", "Тоо", "#ef8a2a"],
+    ["prob", "➕", "Бодлого", "#3fa65a"],
+    ["game", "🎮", "Тоглоом", "#dd4479"],
+  ];
 
   const BRAND = "Сурагч";
   // Бага анги: 1-5. Шинэ хичээл нэмэхдээ доорх жагсаалтад нэмнэ (түлхүүр нь JSON-ийн "subject").
@@ -120,7 +134,7 @@
     const lesson = LESSONS.find((l) => l.id === id);
     if (id === "g" && GRADES.includes(Number(tab))) gradeView(Number(tab));
     else if (id === "support" && SUPPORT.account) supportView();
-    else if (lesson) lessonView(lesson, TABS.some((t) => t[0] === tab) ? tab : "video");
+    else if (lesson) lessonView(lesson, tabsOf(lesson).some((t) => t[0] === tab) ? tab : "video");
     else home();
     window.scrollTo(0, 0);
   }
@@ -164,10 +178,9 @@
 
   // ------------------------------------------------ нүүр
   function lessonRow(l, showPlace) {
-    const body = l.letters
-      ? `<div class="lesson-letters" aria-label="Үсгүүд: ${[...l.letters].join(", ")}">
-          ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
-        </div>`
+    const body = l.type === "math"
+      ? `<div class="lesson-title">${esc(l.topic)}</div>${chipRow(l, l.topic)}`
+      : l.letters ? chipRow(l, `Үсгүүд: ${[...l.letters].join(", ")}`)
       : `<div class="lesson-title">${esc(l.title || "")}</div>`;
     return `
       <li class="lesson-row">
@@ -181,7 +194,7 @@
     document.title = `${BRAND} | Бага ангийн хичээл`;
     const h1 = [...BRAND].map((ch, i) =>
       `<span class="tw ${cls(ch)}" style="animation-delay:${i * 60}ms">${esc(ch)}</span>`).join("");
-    const latest = LESSONS.slice().reverse().slice(0, 5);
+    const latest = LESSONS.slice().sort((a, b) => (b.added || 0) - (a.added || 0) || b.number - a.number).slice(0, 5);
     app.innerHTML = `
       <header class="hero">
         <h1 aria-label="${BRAND}">${h1}</h1>
@@ -223,17 +236,16 @@
 
   // ------------------------------------------------ хичээл
   function lessonView(l, tab) {
-    document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${[...l.letters].join(" ")} | ${BRAND}`;
+    const what = l.type === "math" ? l.topic : [...l.letters].join(" ");
+    document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${what} | ${BRAND}`;
     app.innerHTML = `
       <div class="lesson-head">
         <a class="btn ghost back" href="#/g/${l.grade}">← ${l.grade}-р анги</a>
-        <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}</small></h1>
-        <div class="lesson-letters" aria-label="Үсгүүд">
-          ${[...l.letters].map((ch) => `<span class="mini${l.new.includes(ch) ? " new" : ""}">${colorize(ch)}</span>`).join("")}
-        </div>
+        <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}${l.type === "math" ? `: ${esc(l.topic)}` : ""}</small></h1>
+        ${chipRow(l, l.type === "math" ? l.topic : "Үсгүүд")}
       </div>
       <div class="tabs" role="tablist">
-        ${TABS.map(([k, ico, lbl, col]) => `
+        ${tabsOf(l).map(([k, ico, lbl, col]) => `
           <button class="tab" role="tab" aria-selected="${k === tab}" data-tab="${k}" style="--tabc:${col}">
             <span class="ico" aria-hidden="true">${ico}</span><span class="lbl">${lbl}</span>
           </button>`).join("")}
@@ -241,7 +253,10 @@
       <section class="panel" role="tabpanel"></section>`;
     $$(".tab").forEach((b) => b.addEventListener("click", () => { location.hash = `#/${l.id}/${b.dataset.tab}`; }));
     const panel = $(".panel");
-    ({ video: videoPanel, letters: lettersPanel, syl: sylPanel, words: wordsPanel, sent: sentPanel, game: gamePanel })[tab](panel, l);
+    const panels = l.type === "math"
+      ? { video: videoPanel, nums: numsPanel, prob: probPanel, game: mathGamePanel }
+      : { video: videoPanel, letters: lettersPanel, syl: sylPanel, words: wordsPanel, sent: sentPanel, game: gamePanel };
+    panels[tab](panel, l);
   }
 
   // нийтлэг: data-a товч дарахад дуу тоглуулна
@@ -463,6 +478,166 @@
     p.innerHTML = `<div class="game">
       <h2>Сонсоод ол</h2>
       <p class="hint">Үгийг сонсоод, зөв бичигдсэн үгийг дараарай.</p>
+      <button class="btn startg">▶ Эхлэх</button>
+    </div>`;
+    $(".startg", p).addEventListener("click", start);
+  }
+
+  // ------------------------------------------------ математик
+  const objs = (e, n) => `<span class="objs" aria-hidden="true">${Array.from({ length: n }, (_, i) =>
+    `<span class="ob" style="animation-delay:${i * 90}ms">${e}</span>`).join("")}</span>`;
+
+  function numsPanel(p, l) {
+    p.innerHTML = `<h2>Тоотой танилцъя</h2>
+      <p class="hint">Тоон дээр дарж сонсоод, зүйлсийг хамт тоолоорой.</p>
+      <div class="num-grid">
+        ${l.nums.map((c, i) => `
+          <button class="tile num-card" data-i="${i}" aria-label="${c.n}, ${c.word}">
+            <span class="num-big">${colorize(String(c.n))}</span>
+            <span class="num-word">${esc(c.word)}</span>
+            <span class="num-objs">${c.n ? objs(c.emoji, c.n) : `<span class="objs"><span class="ob">${c.emoji}</span></span>`}</span>
+          </button>`).join("")}
+      </div>`;
+    $$(".num-card", p).forEach((b) => b.addEventListener("click", () => {
+      const c = l.nums[b.dataset.i];
+      clearMarks();
+      const obs = $$(".ob", b);
+      const steps = [{ before: () => b.classList.add("playing"), a: l.num_audio[c.n] }, { ms: 250 }];
+      for (let k = 0; k < c.n; k++) {
+        steps.push({ before: () => obs[k].classList.add("on"), a: l.num_audio[k + 1] }, { ms: 120 });
+      }
+      if (c.sa) steps.push({ ms: 200 }, { a: c.sa });
+      steps.push({ ms: 400, after: () => { b.classList.remove("playing"); obs.forEach((o) => o.classList.remove("on")); } });
+      playSeq(steps);
+    }));
+  }
+
+  // "2 + 1 = ?" илэрхийлэл. hidden: асуултын тэмдгээр солих байрлал
+  const tokHtml = (t, hidden) => t.map((tk, i) => {
+    if (i === hidden) return `<span class="tok q${/^[0-9]+$/.test(tk) ? "" : " sgn"}">?</span>`;
+    return /^[0-9]+$/.test(tk) ? `<span class="tok">${colorize(tk)}</span>` : `<span class="op">${esc(tk)}</span>`;
+  }).join("");
+
+  function probPanel(p, l) {
+    p.innerHTML = `<h2>Бодлого бодъё</h2>
+      <p class="hint">Хариултаа чангаар хэлээд, <b>?</b> дээр дарж шалгаарай.</p>
+      <div class="prob-list">
+        ${l.problems.map((q, i) => `
+          <button class="tile prob" data-i="${i}" aria-label="Хариуг харах">
+            ${q.emoji ? `<span class="em" aria-hidden="true">${q.emoji}</span>` : ""}
+            <span class="expr">${tokHtml(q.t, q.h)}</span>
+          </button>`).join("")}
+      </div>`;
+    $$(".prob", p).forEach((row) => row.addEventListener("click", () => {
+      const q = l.problems[row.dataset.i];
+      const tk = $(".tok.q", row);
+      if (tk) {
+        tk.classList.remove("q");
+        tk.classList.add("ok");
+        tk.innerHTML = /^[0-9]+$/.test(q.t[q.h]) ? colorize(q.t[q.h]) : esc(q.t[q.h]);
+        row.classList.add("done");
+        sfxRight();
+      }
+      clearMarks();
+      setTimeout(() => playSeq([{ a: q.a }]), tk ? 350 : 0);
+    }));
+  }
+
+  function mathGamePanel(p, l) {
+    const TOTAL = 6;
+    const EMO = ["🍎", "🐟", "⭐", "🐥", "🎈", "🌸", "🍓", "🐞", "🍪", "🚗"];
+    const max = l.game.max;
+    const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+    const TITLE = { count: "Хэд байна?", add: "Нэмж бодоорой", sub: "Хасаж бодоорой", compare: "Тэмдгээ ол",
+                    split: "Хэд дутуу вэ?", mix: "Бодоод ол" };
+    let round = 0, score = 0, missed = false;
+
+    function numOpts(ans, lo, hi) {
+      const set = new Set([ans]);
+      let guard = 0;
+      while (set.size < 3 && guard++ < 50) set.add(Math.max(lo, Math.min(hi, ans + rnd(-3, 3))));
+      for (let v = lo; set.size < 3; v++) set.add(v);
+      return shuffle([...set].map(String));
+    }
+    const make = () => {
+      let kind = l.game.kind;
+      if (kind === "mix") kind = ["add", "sub", "compare"][rnd(0, 2)];
+      const e = EMO[rnd(0, EMO.length - 1)];
+      if (kind === "count") {
+        const n = rnd(1, max);
+        return { pic: objs(e, n), q: "", ans: String(n), opts: numOpts(n, 1, max), audio: l.q_audio };
+      }
+      if (kind === "add") {
+        const c = rnd(2, max), a = rnd(1, c - 1), b = c - a;
+        return { pic: `${objs(e, a)}<span class="op">+</span>${objs(e, b)}`,
+                 q: tokHtml([String(a), "+", String(b), "=", String(c)], 4), ans: String(c), opts: numOpts(c, 0, max) };
+      }
+      if (kind === "sub") {
+        const a = rnd(2, max), b = rnd(1, a), c = a - b;
+        return { pic: objs(e, a), q: tokHtml([String(a), "−", String(b), "=", String(c)], 4), ans: String(c),
+                 opts: numOpts(c, 0, max), strike: b };
+      }
+      if (kind === "compare") {
+        const a = rnd(1, max), b = Math.random() < 0.25 ? a : rnd(1, max);
+        const sgn = a < b ? "<" : a > b ? ">" : "=";
+        return { pic: `${objs(e, a)}<span class="op">?</span>${objs(e, b)}`, q: tokHtml([String(a), sgn, String(b)], 1),
+                 ans: sgn, opts: ["<", "=", ">"], sym: true };
+      }
+      const n = rnd(2, max), a = rnd(1, n - 1), b = n - a;   // тоог задлах
+      return { pic: objs(e, n), q: tokHtml([String(n), "→", String(a), "ба", String(b)], 4), ans: String(b),
+               opts: numOpts(b, 1, n - 1) };
+    };
+    const stars = () => "⭐".repeat(score) + "☆".repeat(TOTAL - score);
+    const start = () => { round = 0; score = 0; next(); };
+    const next = () => {
+      if (round >= TOTAL) return finish();
+      missed = false;
+      const g = make();
+      p.innerHTML = `<div class="game mgame">
+        <h2>${TITLE[l.game.kind]}</h2>
+        <div class="score" aria-label="Оноо ${score}">${stars()}</div>
+        <div class="pic">${g.pic}</div>
+        ${g.q ? `<div class="expr big">${g.q}</div>` : ""}
+        <div class="choices">
+          ${g.opts.map((o) => `<button class="tile choice${g.sym ? " sym" : ""}" data-v="${esc(o)}">${g.sym ? esc(o) : colorize(o)}</button>`).join("")}
+        </div>
+      </div>`;
+      if (g.strike) $$(".pic .ob", p).slice(-g.strike).forEach((o) => o.classList.add("gone"));
+      if (g.audio) playSeq([{ a: g.audio }]);
+      $$(".choice", p).forEach((b) => b.addEventListener("click", () => {
+        if (b.dataset.v === g.ans) {
+          b.classList.add("right");
+          if (!missed) score++;
+          $(".score", p).textContent = stars();
+          const q = $(".expr .q", p);
+          if (q) { q.classList.remove("q"); q.classList.add("ok"); q.innerHTML = g.sym ? esc(g.ans) : colorize(g.ans); }
+          sfxRight();
+          $$(".choice", p).forEach((x) => { x.disabled = true; });
+          setTimeout(() => playSeq([{ a: g.sym ? l.cmp_audio[g.ans] : l.num_audio[Number(g.ans)] }]), 300);
+          round++;
+          setTimeout(next, 1800);
+        } else {
+          missed = true;
+          b.classList.remove("wrong");
+          void b.offsetWidth;
+          b.classList.add("wrong");
+          sfxWrong();
+        }
+      }));
+    };
+    const finish = () => {
+      const msg = score === TOTAL ? "Гайхалтай! Бүгдийг нь зөв бодлоо!" : score >= TOTAL / 2 ? "Сайн байна!" : "Дахиад хичээгээрэй!";
+      p.innerHTML = `<div class="game">
+        <div class="result"><span class="stars">${stars()}</span>${msg}</div>
+        <p class="hint">Зөв: ${score} / ${TOTAL}</p>
+        <button class="btn again">↻ Дахин тоглох</button>
+      </div>`;
+      sfxRight();
+      $(".again", p).addEventListener("click", start);
+    };
+    p.innerHTML = `<div class="game">
+      <h2>${TITLE[l.game.kind]}</h2>
+      <p class="hint">Зургийг хараад, зөв хариултыг дараарай. Тоглох болгонд шинэ бодлого гарна.</p>
       <button class="btn startg">▶ Эхлэх</button>
     </div>`;
     $(".startg", p).addEventListener("click", start);

@@ -17,6 +17,9 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import edge_tts
 
+if __name__ == "__main__":   # make_math.py "import make_lesson" хийхэд энэ модулийг дахин ачаалахгүй
+    sys.modules.setdefault("make_lesson", sys.modules["__main__"])
+
 W, H, FPS, SR = 1280, 720, 25, 24000
 BRAND = "Сурагч"   # суваг, сайтын нэр
 FD = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
@@ -30,6 +33,7 @@ DESCENDERS = set("руфдцщ")
 C_VOWEL = (222, 44, 44)      # эгшиг - улаан
 C_CONS = (28, 92, 205)       # гийгүүлэгч - хөх
 C_SEMI = (142, 58, 172)      # й - ягаан
+C_NUM = (236, 104, 24)       # тоо - улбар шар
 C_INK = (55, 55, 75)
 C_HL = (255, 224, 90)
 C_OK = (196, 240, 190)
@@ -48,6 +52,8 @@ def letter_color(ch):
         return C_VOWEL
     if c in SEMIVOWELS:
         return C_SEMI
+    if c.isdigit():
+        return C_NUM
     if c.isalpha():
         return C_CONS
     return C_INK
@@ -128,6 +134,7 @@ class TTS:
         self.cache = cache_dir
         os.makedirs(cache_dir, exist_ok=True)
         self.pending, self.mem, self.collect = set(), {}, True
+        self.dry = os.environ.get("TTS_DRY") == "1"   # туршилт: дуугүй, API дуудахгүй
         if self.provider == "chimege":
             c = cfg.get("chimege", {})
             self.voice = c.get("voice", "FEMALE3v2")
@@ -173,6 +180,8 @@ class TTS:
         if self.collect:
             self.pending.add((text, rate))
             return np.zeros(SR, np.float32)
+        if self.dry:
+            return np.zeros(int(max(0.5, 0.075 * len(text)) * SR), np.float32)
         key = (text, rate)
         if key not in self.mem:
             self.mem[key] = load_audio(self.path(text, rate))
@@ -200,6 +209,10 @@ class TTS:
             raise RuntimeError(f"TTS амжилтгүй: {text!r}: {err}")
 
     def generate_all(self):
+        if self.dry:
+            print(f"TTS_DRY: {len(self.pending)} дууг алгаслаа (дуугүй туршилт)")
+            self.collect = False
+            return
         todo = [(t, r) for t, r in sorted(self.pending)
                 if not (os.path.exists(self.path(t, r)) and os.path.getsize(self.path(t, r)) > 0)]
         if self.provider == "chimege" and todo:
@@ -324,7 +337,8 @@ def draw_word(d, word, cx, cy, size, hl=(), hl_color=C_HL, arcs=(), color=None, 
     if size < 6:
         return
     f = font(path, size)
-    ref = ref or ("Ам" if any(c.isupper() for c in word) else "ам")
+    if not ref:
+        ref = "0" if not any(c.isalpha() for c in word) else "Ам" if any(c.isupper() for c in word) else "ам"
     _, t, _, b = f.getbbox(ref, anchor="ls")
     base = cy - (t + b) / 2
     xh = -f.getbbox("а", anchor="ls")[1]
@@ -756,17 +770,22 @@ class Lesson:
 
 
 def draw_overlay(fr, d, section, letters, new):
-    size, cell, gap = 34, 44, 8
-    n = len(letters)
+    """Баруун дээд буланд үзсэн үсэг (эсвэл тоо, тэмдэг). letters: мөр эсвэл жагсаалт."""
+    toks = list(letters)
+    size, gap = 34, 8
+    f = font(F_TEXT, size)
+    cells = [max(44, f.getlength(tk) + 16) for tk in toks]
     x1 = W - 22
-    x0 = x1 - (n * cell + (n - 1) * gap + 28)
+    x0 = x1 - (sum(cells) + (len(toks) - 1) * gap + 28)
     y0, y1 = 18, 76
     d.rounded_rectangle([x0, y0, x1, y1], 29, fill=C_WHITE, outline=(232, 222, 205), width=3)
-    for i, ch in enumerate(letters):
-        cx = x0 + 14 + cell / 2 + i * (cell + gap)
-        if ch in new:
-            d.ellipse([cx - 22, y0 + 7, cx + 22, y0 + 51], fill=(255, 236, 160))
-        draw_word(d, ch, cx, (y0 + y1) / 2, size)
+    x = x0 + 14
+    for tk, c in zip(toks, cells):
+        cx = x + c / 2
+        if tk in new:
+            d.rounded_rectangle([cx - c / 2, y0 + 7, cx + c / 2, y0 + 51], 22, fill=(255, 236, 160))
+        draw_word(d, tk, cx, (y0 + y1) / 2, size)
+        x += c + gap
     if section:
         title, color = section
         f = font(F_HEAD, 30)
@@ -799,6 +818,8 @@ def lesson_id(cfg_path):
 
 
 def validate(cfg):
+    if cfg.get("type") == "math":
+        return
     ok = set(cfg["letters"])
     bad = []
     items = [w["w"] for w in cfg["words"]] + [s["s"] for s in cfg.get("sentences", [])] + cfg.get("quiz", [])
@@ -950,11 +971,11 @@ def make_thumbnail(cfg, bg, path):
     d = ImageDraw.Draw(fr)
     draw_text_center(d, cfg.get("title", "Уншиж сурцгаая!"), W / 2, 205, 96, (255, 112, 40),
                      stroke=10, stroke_fill=C_WHITE)
-    letters, new = cfg["letters"], cfg.get("new_letters", "")
+    letters, new = overlay_tokens(cfg)
     cell = min(150, (W - 120) / len(letters) - 16)
     for i, (x, y) in enumerate(grid(len(letters), 385, cell, 16, maxrow=12)):
         ch = letters[i]
-        draw_tile(d, ch, x, y, cell, cell * 1.1, text_size=cell * 0.75,
+        draw_tile(d, ch, x, y, cell, cell * 1.1, text_size=cell * (0.6 if len(ch) > 1 else 0.75),
                   fill=(255, 238, 160) if ch in new else C_WHITE)
     num = cfg.get("lesson_number")
     if num:
@@ -964,8 +985,15 @@ def make_thumbnail(cfg, bg, path):
     draw_text_center(d, f"{cfg.get('grade', 1)}-р анги", W - 240, 580, 64, C_WHITE)
     big = watermark_img(2)
     fr.paste(big, (int(W / 2 - big.width / 2), 22), big)
-    paste_emoji(fr, "📚", W / 2, 585, 150)
+    paste_emoji(fr, cfg.get("thumb_emoji", "📚"), W / 2, 585, 150)
     fr.save(path)
+
+
+def overlay_tokens(cfg):
+    """Видео болон thumbnail дээр харуулах үсэг/тоо, шинээр нь тодруулах хэсэг."""
+    if cfg.get("type") == "math":
+        return [str(c) for c in cfg["chips"]], [str(c) for c in cfg.get("new_chips", [])]
+    return list(cfg["letters"]), cfg.get("new_letters", "")
 
 
 DESC_LINKS = [
@@ -975,9 +1003,58 @@ DESC_LINKS = [
 ]
 
 
+def math_youtube(cfg, chap):
+    num, grade = cfg.get("lesson_number", ""), cfg.get("grade", 1)
+    title = f"{cfg.get('title', 'Тоолж сурцгаая!')} {num}-р хичээл: {cfg['topic']} | {grade}-р анги математик | {BRAND}"
+    desc = "\n".join([
+        f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан математикийн хичээл.",
+        f"Сэдэв: {cfg['topic']}.",
+        cfg.get("summary", ""),
+        "",
+        "Дэлгэцийн буланд 🗣️ тэмдэг гарахад хүүхэд чангаар давтаж хэлээрэй.",
+        "Асуулт гарахад видеог зогсоолгүй, 3 хүртэл тоолох хооронд хариултаа хэлээрэй.",
+        "",
+        "Хичээлийн агуулга:",
+        chap,
+        "",
+        *DESC_LINKS,
+        "",
+        f"#{BRAND.lower()} #математик #{grade}ранги #тоо #тоолох",
+    ])
+    tags = (f"{BRAND.lower()}, математик, тоо, тоолох, тоо тоолох, нэмэх, хасах, их бага, {grade}-р анги, "
+            "нэгдүгээр анги, бага анги, хүүхдэд, хичээл, тоо сурах, " + cfg["topic"])
+    return title, desc, tags
+
+
 def write_youtube(cfg, chapters, name, root, bg):
     out = os.path.join(root, "youtube")
     os.makedirs(out, exist_ok=True)
+    chap = "\n".join(f"{int(t // 60)}:{int(t % 60):02d} {n}" for t, n in chapters)
+    if cfg.get("type") == "math":
+        title, desc, tags = math_youtube(cfg, chap)
+    else:
+        title, desc, tags = reading_youtube(cfg, chap)
+    thumb = os.path.join(out, f"{name}_thumbnail.png")
+    make_thumbnail(cfg, bg, thumb)
+    txt = "\n".join([
+        "ГАРЧИГ (Title):", title, "",
+        "ТАЙЛБАР (Description):", desc, "",
+        "ШОШГО (Tags):", tags, "",
+        "ТОХИРГОО:",
+        f"- Thumbnail: {os.path.basename(thumb)}",
+        "- Audience: Yes, it's made for kids (Хүүхдэд зориулсан)",
+        "- Visibility: Public",
+        "- Category: Education",
+        "- Video language: Mongolian",
+        "",
+    ])
+    p = os.path.join(out, f"{name}_youtube.txt")
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(txt)
+    print("YouTube:", p)
+
+
+def reading_youtube(cfg, chap):
     letters = ", ".join(cfg["letters"])
     new = ", ".join(cfg.get("new_letters", "")) or "-"
     num = cfg.get("lesson_number", "")
@@ -1005,24 +1082,7 @@ def write_youtube(cfg, chapters, name, root, bg):
     ])
     tags = (f"{BRAND.lower()}, уншлага, уншиж сурах, цагаан толгой, монгол хэл, 1-р анги, нэгдүгээр анги, "
             "бага анги, үсэг, үе холбох, хүүхдэд, хичээл, " + ", ".join(cfg["letters"]) + " үсэг")
-    thumb = os.path.join(out, f"{name}_thumbnail.png")
-    make_thumbnail(cfg, bg, thumb)
-    txt = "\n".join([
-        "ГАРЧИГ (Title):", title, "",
-        "ТАЙЛБАР (Description):", desc, "",
-        "ШОШГО (Tags):", tags, "",
-        "ТОХИРГОО:",
-        f"- Thumbnail: {os.path.basename(thumb)}",
-        "- Audience: Yes, it's made for kids (Хүүхдэд зориулсан)",
-        "- Visibility: Public",
-        "- Category: Education",
-        "- Video language: Mongolian",
-        "",
-    ])
-    p = os.path.join(out, f"{name}_youtube.txt")
-    with open(p, "w", encoding="utf-8") as f:
-        f.write(txt)
-    print("YouTube:", p)
+    return title, desc, tags
     print("Thumbnail:", thumb)
 
 
@@ -1051,24 +1111,35 @@ def voice_samples():
     print(wav[:-4] + ".mp3")
 
 
+def lesson_class(cfg):
+    if cfg.get("type") == "math":
+        from make_math import MathLesson
+        return MathLesson
+    return Lesson
+
+
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     if "--voices" in sys.argv:
         return voice_samples()
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     cfg_path = sys.argv[1]
     snap = "--snap" in sys.argv
+    if os.environ.get("TTS_DRY") == "1" and not snap:
+        sys.exit("TTS_DRY=1 зөвхөн --snap (шалгах зураг)-тай ажиллана: дуугүй видео, буруу бүлгийн хугацаа гаргахгүйн тулд.")
     global WATERMARK
     WATERMARK = "--no-watermark" not in sys.argv
     cfg = load_cfg(cfg_path)
     validate(cfg)
     root = os.path.dirname(os.path.abspath(__file__))
     tts = TTS(cfg, os.path.join(root, ".tts_cache"))
-    Lesson(cfg, tts).build()          # 1-р алхам: хэрэгтэй дуунуудыг цуглуулна
+    cls = lesson_class(cfg)
+    cls(cfg, tts).build()             # 1-р алхам: хэрэгтэй дуунуудыг цуглуулна
     tts.generate_all()
-    lesson = Lesson(cfg, tts)
+    lesson = cls(cfg, tts)
     tl = lesson.build()               # 2-р алхам: жинхэнэ хугацаагаар
-    letters, new = cfg["letters"], cfg.get("new_letters", "")
+    letters, new = overlay_tokens(cfg)
     bg = make_bg()
     starts = [s[0] for s in tl.scenes]
     name = lesson_id(cfg_path)

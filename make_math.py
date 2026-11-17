@@ -494,9 +494,15 @@ class MathLesson(M.Lesson):
         story = it.get("story")
         add = op == "+"
         size = 92 if max(a, b, c) <= 5 else 78
-        if add:
-            pa = obj_grid(a, W / 2 - 250, 290, size, gap=0.45)
-            pb = obj_grid(b, W / 2 + 250, 290, size, gap=0.45)
+        if add:   # хоёр бүлэг "+"-ийн хоёр талд, дэлгэцэнд багтахаар жижигрүүлнэ
+            def width(k, sz):
+                return (min(k, 5) - 1) * sz * 1.45 + sz
+            plus = 130
+            while width(a, size) + width(b, size) + plus > W - 140 and size > 40:
+                size -= 2
+            wa, wb = width(a, size), width(b, size)
+            pa = obj_grid(a, W / 2 - plus / 2 - wa / 2, 290, size, gap=0.45)
+            pb = obj_grid(b, W / 2 + plus / 2 + wb / 2, 290, size, gap=0.45)
         else:
             pa = obj_grid(a, W / 2, 290, size, gap=0.45)
             pb = []

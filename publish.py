@@ -271,6 +271,7 @@ def publish_one(path, yt=None):
     print(f"  Оруулсан: https://youtu.be/{vid} ({resp['status'].get('privacyStatus')})")
     set_thumbnail(yt, vid, thumb)
     sync_playlists(yt)
+    facebook_post(path)
 
     run(sys.executable, "build_site.py")
     if "--no-push" not in sys.argv:
@@ -284,8 +285,53 @@ def publish_one(path, yt=None):
     return True
 
 
+def facebook_post(path):
+    """Facebook хуудсанд хуваарьтай пост. Токен байхгүй эсвэл алдаа гарвал анхааруулаад үргэлжилнэ."""
+    import fb
+    if not fb.load_token():
+        return False
+    cfg = M.load_cfg(path)
+    if cfg.get("facebook_id"):
+        return False
+    name = M.lesson_id(path)
+    mp4 = os.path.join(ROOT, "videos", name + ".mp4")
+    thumb = os.path.join(ROOT, "youtube", name + "_thumbnail.png")
+    try:
+        print("  Facebook руу оруулж байна...", flush=True)
+        _, when = fb.post_lesson(path, mp4, thumb)
+        print(f"  Facebook: {when.strftime('%m-%d %H:%M')}-д нийтлэгдэнэ")
+        return True
+    except fb.FBError as e:
+        print(f"  Анхаар: Facebook-д оруулж чадсангүй: {e}")
+        return False
+
+
+def facebook_backlog():
+    """YouTube-д орсон ч Facebook-д ороогүй хичээлүүд: эхлээд математик, дараа нь бусад, дугаарын дарааллаар."""
+    out = []
+    for p in glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True):
+        cfg = M.load_cfg(p)
+        if cfg.get("youtube_id") and not cfg.get("facebook_id"):
+            out.append(((cfg.get("subject") != "math", cfg.get("grade", 1), cfg.get("lesson_number") or 0), p))
+    return [p for _, p in sorted(out)]
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if "--facebook" in sys.argv:
+        todo = facebook_backlog()
+        print(f"Facebook-д ороогүй {len(todo)} хичээл байна (өдөрт 1, орой 20:00).")
+        done = 0
+        for p in todo:
+            print(f"\n== {os.path.relpath(p, ROOT)}")
+            if not facebook_post(p):
+                break
+            done += 1
+        if done and "--no-push" not in sys.argv:
+            run("git", "add", "lessons")
+            run("git", "commit", "-q", "-m", f"Facebook: {done} хичээлийн пост хуваарьт орлоо")
+            run("git", "push", "-q")
+        return
     if "--sync" in sys.argv:
         return sync_playlists(youtube())
     if "--pending" in sys.argv:

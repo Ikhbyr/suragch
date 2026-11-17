@@ -7,3 +7,5 @@ __pycache__/
 samples/
 client_secret*.json
 .youtube_token.json
+.fb_token
+.fb_setup.json

@@ -78,6 +78,21 @@ python publish.py --pending                 # YouTube-д ороогүй бүх �
   дахин нэвтрүүлнэ.
 - Шаардлагатай сан: `python -m pip install --user google-api-python-client google-auth-oauthlib`
 
+## Facebook хуудас
+
+`publish.py` нь YouTube-д оруулсны дараа бичлэгийг Facebook хуудсанд **хуваарьтай** нийтэлнэ:
+өдөрт 1 пост, орой 20:00 цагт. Хичээлийн JSON-д `facebook_id`, `facebook_time` бичигдэнэ.
+
+```
+python publish.py --facebook   # YouTube-д орсон ч Facebook-д ороогүй хичээлүүдийг хуваарьт оруулна
+python fb.py queue             # хуваарь
+python fb.py check             # токен, хуудас
+```
+
+Нэг удаагийн тохиргоо: Meta апп үүсгээд `.fb_setup.json`-д `app_id`, `app_secret`, Graph API Explorer-оос
+авсан `user_token`-оо бичнэ. Дараа нь `python fb.py setup` нь хугацаагүй Page token-ыг `.fb_token`-д хадгална.
+Хоёр файл хоёулаа git-д орохгүй.
+
 ## YouTube-д гараар байршуулах
 
 1. https://studio.youtube.com → **Create → Upload videos** → `videos/hicheel_07.mp4`

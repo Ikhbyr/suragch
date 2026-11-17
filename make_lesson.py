@@ -40,9 +40,10 @@ C_OK = (196, 240, 190)
 C_WHITE = (255, 255, 255)
 C_SHADOW = (206, 214, 228)
 C_GRAY = (175, 175, 185)
+C_DIM = (196, 198, 210)      # үзээгүй үсэг (сонсох үгэнд)
 SECTION_COLORS = {
     "letters": (255, 138, 60), "syllables": (67, 170, 80), "words": (33, 140, 230),
-    "sentences": (150, 60, 180), "quiz": (235, 70, 70),
+    "sentences": (150, 60, 180), "quiz": (235, 70, 70), "listen": (230, 110, 160),
 }
 
 
@@ -332,7 +333,8 @@ def word_width(word, size, path=F_TEXT):
     return font(path, size).getlength(word)
 
 
-def draw_word(d, word, cx, cy, size, hl=(), hl_color=C_HL, arcs=(), color=None, path=F_TEXT, ref=None):
+def draw_word(d, word, cx, cy, size, hl=(), hl_color=C_HL, arcs=(), color=None, path=F_TEXT, ref=None,
+              char_colors=None):
     """Үгийг үсэг бүрийг өнгөөр нь зурна. hl/arcs - (эхлэл, төгсгөл) индексийн жагсаалт."""
     if size < 6:
         return
@@ -351,7 +353,8 @@ def draw_word(d, word, cx, cy, size, hl=(), hl_color=C_HL, arcs=(), color=None, 
         d.rounded_rectangle([xs[s] - pad, base - xh * 1.9, xs[e] + pad, base + low],
                             radius=int(size * 0.16), fill=hl_color)
     for i, ch in enumerate(word):
-        d.text((xs[i], base), ch, font=f, fill=color or letter_color(ch), anchor="ls")
+        fill = char_colors[i] if char_colors else color or letter_color(ch)
+        d.text((xs[i], base), ch, font=f, fill=fill, anchor="ls")
     for s, e in arcs:
         sh = size * 0.16 if desc else 0
         d.arc([xs[s] + pad * 0.2, base - size * 0.10 + sh, xs[e] - pad * 0.2, base + size * 0.30 + sh],
@@ -408,6 +411,7 @@ class Lesson:
         self.letters = cfg["letters"]
         self.new = cfg.get("new_letters", "")
         self.rn, self.rr = tts.rn, tts.rr
+        self.extra = cfg.get("repeat_extra", 0.0)   # хүүхэд давтах нэмэлт хугацаа (сек)
         self.tl = Timeline()
         self.chapters = [(0.0, "Эхлэл")]
 
@@ -485,10 +489,12 @@ class Lesson:
             tl.sound(t_ex, SFX_POP)
             tl.sound(t_ex + 0.35, a)
             t = t_ex + 0.35 + dur(a)
-        length = t + 1.6
+        length = t + 1.6 + self.extra
         t_turn = t + 0.1
         cx = 400 if ex else W / 2
         hl = [(i, i + 1) for i, c in enumerate(ex or "") if c == ch]
+        ex_colors = ([letter_color(c) if c.lower() in self.letters else C_DIM for c in ex]
+                     if ex and info.get("listen") else None)
 
         def draw(fr, d, tt):
             s = pop(tt, 0.05, 0.5)
@@ -506,7 +512,8 @@ class Lesson:
             if ex:
                 se = pop(tt, t_ex)
                 paste_emoji(fr, emoji, 900, 285, 170 * se)
-                draw_word(d, ex, 900, 495 if emoji else 400, 130 * se, hl=hl)
+                draw_word(d, ex, 900, 495 if emoji else 400, min(130, 520 / max(1, len(ex)) * 1.6) * se,
+                          hl=hl, char_colors=ex_colors)
             draw_your_turn(fr, tt, t_turn, length)
         tl.add(length, draw)
 
@@ -527,7 +534,7 @@ class Lesson:
         a = self.read(cap(syl) + ".")
         t_join, t_say = 0.55, 0.72
         t_end = t_say + dur(a)
-        length = t_end + 1.5
+        length = t_end + 1.5 + self.extra
         tl.sound(t_join - 0.03, SFX_POP)
         tl.sound(t_say, a)
 
@@ -566,7 +573,7 @@ class Lesson:
             tl.sound(t, a)
             steps.append((t, t + dur(a) + 0.2))
             t += dur(a) + 0.3
-        length = t + 1.7
+        length = t + 1.7 + self.extra
         cell = min(230, (W - 160) / len(group) - 24)
         pos = grid(len(group), 360, cell, 24, maxrow=8)
 
@@ -615,7 +622,7 @@ class Lesson:
             ae = self.say(w["explain"])
             tl.sound(t, ae)
             t += dur(ae)
-        length = t + 1.6
+        length = t + 1.6 + self.extra
         t_turn = t_word + dur(aw) + 0.1
         size = min(220, (W - 200) / max(1, len(word)) * 1.6)
         cy = 475 if emoji else 380
@@ -633,6 +640,51 @@ class Lesson:
             draw_word(d, word, W / 2, cy, size * s, hl=hl, hl_color=col, arcs=arcs)
             if emoji:
                 paste_emoji(fr, emoji, W / 2, 175, 150 * pop(tt, t_word))
+            draw_your_turn(fr, tt, t_turn, length)
+        tl.add(length, draw)
+
+    def listen_word(self, w):
+        """Сонсоод ол: үгийг уншаад, шинэ үсгийг нь нэг нэгээр тодруулна. Бусад үсэг саарал."""
+        tl = self.tl
+        word, emoji = w["w"], w.get("emoji")
+        target = set(self.new.lower())
+        idx = [i for i, c in enumerate(word) if c.lower() in target]
+        tl.sound(0.05, SFX_POP)
+        aw = self.read(cap(word) + ".")
+        t_word = 0.6
+        tl.sound(t_word, aw)
+        t = t_word + dur(aw) + 0.5
+        steps = []
+        for i in idx:
+            a = self.read(cap(word[i].lower()) + ".")
+            tl.sound(t, SFX_POP)
+            tl.sound(t + 0.1, a)
+            steps.append(t)
+            t += 0.1 + dur(a) + 0.3
+        t += 0.2
+        t_again = t
+        tl.sound(t_again, aw)
+        t = t_again + dur(aw)
+        if w.get("explain"):
+            t += 0.5
+            ae = self.say(w["explain"])
+            tl.sound(t, ae)
+            t += dur(ae)
+        length = t + 1.6 + self.extra
+        t_turn = t_again + dur(aw) + 0.1
+        size = min(210, (W - 200) / max(1, len(word)) * 1.6)
+        cy = 480 if emoji else 380
+
+        def draw(fr, d, tt):
+            s = pop(tt, 0.05, 0.5)
+            lit = {i for k, i in enumerate(idx) if tt >= steps[k]}
+            cur = [(i, i + 1) for k, i in enumerate(idx) if steps[k] <= tt < steps[k] + 0.7]
+            again = t_again <= tt < t_again + dur(aw) + 0.2
+            colors = [letter_color(c) if i in lit else C_DIM for i, c in enumerate(word)]
+            draw_word(d, word, W / 2, cy, size * s, hl=cur or ([(0, len(word))] if again else []),
+                      hl_color=C_HL if cur else C_OK, char_colors=colors)
+            if emoji:
+                paste_emoji(fr, emoji, W / 2, 190, 150 * pop(tt, 0.1))
             draw_your_turn(fr, tt, t_turn, length)
         tl.add(length, draw)
 
@@ -656,7 +708,7 @@ class Lesson:
         if sd.get("emoji"):
             tl.sound(t_full, SFX_POP)
         t = t_full + dur(af)
-        length = t + 2.0
+        length = t + 2.0 + self.extra
         size = 140
         sp = font(F_TEXT, size).getlength(" ") * 1.4
         while sum(word_width(tk, size) for tk in toks) + sp * (len(toks) - 1) > W - 140:
@@ -697,7 +749,7 @@ class Lesson:
         aw = self.read(cap(word) + ".")
         tl.sound(t_rev, SFX_DING)
         tl.sound(t_rev + 0.15, aw)
-        length = t_rev + 0.15 + dur(aw) + 1.3
+        length = t_rev + 0.15 + dur(aw) + 1.3 + self.extra / 2
         size = min(200, (W - 300) / max(1, len(word)) * 1.6)
         cw = max(560, word_width(word, size) + 160)
 
@@ -749,14 +801,21 @@ class Lesson:
         self.section("letters")
         for ch in self.letters:
             self.letter(ch)
-        self.section("syllables")
-        for g in self.syllable_groups():
-            for i, s in enumerate(g):
-                self.syllable(s, g, i)
-            self.syllable_row(g)
-        self.section("words")
-        for w in cfg["words"]:
-            self.word(w)
+        if cfg.get("listen_words"):
+            self.section("listen")
+            for w in cfg["listen_words"]:
+                self.listen_word(w)
+        groups = self.syllable_groups()
+        if groups:
+            self.section("syllables")
+            for g in groups:
+                for i, s in enumerate(g):
+                    self.syllable(s, g, i)
+                self.syllable_row(g)
+        if cfg.get("words"):
+            self.section("words")
+            for w in cfg["words"]:
+                self.word(w)
         if cfg.get("sentences"):
             self.section("sentences")
             for s in cfg["sentences"]:
@@ -822,8 +881,8 @@ def validate(cfg):
         return
     ok = set(cfg["letters"])
     bad = []
-    items = [w["w"] for w in cfg["words"]] + [s["s"] for s in cfg.get("sentences", [])] + cfg.get("quiz", [])
-    items += [i.get("example", "") for i in cfg.get("letter_info", {}).values()]
+    items = [w["w"] for w in cfg.get("words", [])] + [s["s"] for s in cfg.get("sentences", [])] + cfg.get("quiz", [])
+    items += [i.get("example", "") for i in cfg.get("letter_info", {}).values() if not i.get("listen")]
     for it in items:
         extra = {c for c in it.lower() if c.isalpha() and c not in ok}
         if extra:
@@ -1058,15 +1117,16 @@ def reading_youtube(cfg, chap):
     letters = ", ".join(cfg["letters"])
     new = ", ".join(cfg.get("new_letters", "")) or "-"
     num = cfg.get("lesson_number", "")
-    words = ", ".join(w["w"] for w in cfg["words"])
-    chap = "\n".join(f"{int(t // 60)}:{int(t % 60):02d} {n}" for t, n in chapters)
+    words = ", ".join(w["w"] for w in cfg.get("words", []))
+    heard = ", ".join(w["w"] for w in cfg.get("listen_words", []))
     grade = cfg.get("grade", 1)
     title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | {grade}-р анги | {BRAND}"
     if len(title) > 100:  # YouTube-ийн хязгаар: үсэг олон болоход зөвхөн шинэ үсгээ бичнэ
         title = f"Уншиж сурцгаая! {num}-р хичээл: шинэ үсэг {new.upper()} | {grade}-р анги | {BRAND}"
     desc = "\n".join([
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
-        f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина.",
+        (f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") else
+         f"{new.upper()} үсэгтэй танилцаж, сонссон үгэн дотроос нь олж сурна."),
         f"Шинэ үсэг: {new}",
         "",
         "Дэлгэцийн буланд 🗣️ тэмдэг гарахад хүүхэд чангаар давтаж хэлээрэй.",
@@ -1074,7 +1134,7 @@ def reading_youtube(cfg, chap):
         "Хичээлийн агуулга:",
         chap,
         "",
-        f"Унших үгс: {words}",
+        f"Унших үгс: {words}" if words else f"Сонсох үгс: {heard}",
         "",
         *DESC_LINKS,
         "",

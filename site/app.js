@@ -23,7 +23,13 @@
   const chipRow = (l, label) => `<div class="lesson-letters" aria-label="${label}">
       ${chipsOf(l).map((ch) => `<span class="mini${isNewChip(l, ch) ? " new" : ""}${ch.length > 1 ? " wide" : ""}">${colorize(ch)}</span>`).join("")}
     </div>`;
-  const tabsOf = (l) => (l.type === "math" ? MATH_TABS.filter((t) => t[0] !== "nums" || l.nums.length) : TABS);
+  // уншлагын тоглоомын сан: үг + асуулт, хүрэлцэхгүй бол үе
+  const gamePool = (l) => (l.game.length >= 3 ? l.game : l.syllables.flat().map((s) => ({ w: s.t, a: s.a })));
+  const READ_HAS = { syl: (l) => l.syllables.length, words: (l) => l.words.length,
+                     sent: (l) => l.sentences.length, game: (l) => gamePool(l).length >= 3 };
+  const tabsOf = (l) => (l.type === "math"
+    ? MATH_TABS.filter((t) => t[0] !== "nums" || l.nums.length)
+    : TABS.filter((t) => !READ_HAS[t[0]] || READ_HAS[t[0]](l)));
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const $ = (sel, root = app) => root.querySelector(sel);
   const $$ = (sel, root = app) => [...root.querySelectorAll(sel)];
@@ -291,10 +297,30 @@
               ${l.new.includes(c.ch) ? `<span class="badge">⭐ Шинэ</span>` : ""}
             </button>
             ${c.example ? `<button class="tile ex" data-a="${c.ea}" aria-label="${c.example}">
-              ${c.emoji ? `<span class="em" aria-hidden="true">${c.emoji}</span>` : ""}<span>${colorize(c.example, c.ch)}</span>
+              ${c.emoji ? `<span class="em" aria-hidden="true">${c.emoji}</span>` : ""}<span>${c.listen
+                ? [...c.example].map((x) => (l.letters.includes(x.toLowerCase()) ? colorize(x, c.ch) : `<span class="dim">${esc(x)}</span>`)).join("")
+                : colorize(c.example, c.ch)}</span>
             </button>` : ""}
           </div>`).join("")}
-      </div>`;
+      </div>
+      ${(l.listen || []).length ? `<h2 class="listen-title">Сонсоод олъё</h2>
+        <p class="hint">Үг дээр дарж сонсоод, ${esc(l.new.toUpperCase())} үсгийг олоорой.</p>
+        <div class="word-grid">
+          ${l.listen.map((w, i) => `
+            <button class="tile word-card listen-card" data-li="${i}" aria-label="${esc(w.w)}">
+              <span class="em" aria-hidden="true">${w.emoji || ""}</span>
+              <span class="word">${[...w.w].map((ch, k) => `<span class="${w.hl.includes(k) ? `${cls(ch)} lt` : "dim"}">${esc(ch)}</span>`).join("")}</span>
+            </button>`).join("")}
+        </div>` : ""}`;
+    $$(".listen-card", p).forEach((b) => b.addEventListener("click", () => {
+      const w = l.listen[b.dataset.li];
+      clearMarks();
+      const lts = $$(".lt", b);
+      const steps = [{ before: () => b.classList.add("playing"), a: w.a }, { ms: 250 }];
+      lts.forEach((x) => steps.push({ before: () => x.classList.add("hl-letter"), ms: 450 }));
+      steps.push({ ms: 900, after: () => { b.classList.remove("playing"); lts.forEach((x) => x.classList.remove("hl-letter")); } });
+      playSeq(steps);
+    }));
     bindAudio(p);
   }
 
@@ -419,7 +445,7 @@
 
   function gamePanel(p, l) {
     const TOTAL = 6;
-    let pool = l.game.length >= 3 ? l.game : l.syllables.flat().map((s) => ({ w: s.t, a: s.a }));
+    let pool = gamePool(l);
     let order = [], round = 0, score = 0, missed = false, target = null;
 
     const start = () => {

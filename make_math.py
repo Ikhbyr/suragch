@@ -84,6 +84,7 @@ class MathLesson(M.Lesson):
     def __init__(self, cfg, tts):
         self.cfg, self.tts = cfg, tts
         self.rn, self.rr = tts.rn, tts.rr
+        self.extra = cfg.get("repeat_extra", 0.0)
         self.tl = Timeline()
         self.chapters = [(0.0, "Эхлэл")]
         self.chips, self.new_chips = M.overlay_tokens(cfg)
@@ -192,7 +193,7 @@ class MathLesson(M.Lesson):
             s = self.say(say)
             tl.sound(t, s)
             t += dur(s)
-        length = t + 1.7
+        length = t + 1.7 + self.extra
         t_turn = t + 0.1
         size = 118 if n <= 5 else 96
         pos = obj_grid(n, 860, 330, size)
@@ -235,7 +236,7 @@ class MathLesson(M.Lesson):
         tl.sound(t_fin, SFX_DING)
         tl.sound(t_fin + 0.1, fin)
         t = t_fin + 0.1 + dur(fin)
-        length = t + 1.6
+        length = t + 1.6 + self.extra
 
         def draw(fr, d, tt):
             for i, (x, y) in enumerate(pos):
@@ -266,7 +267,7 @@ class MathLesson(M.Lesson):
         a = self.num(n)
         tl.sound(t_rev, SFX_DING)
         tl.sound(t_rev + 0.15, a)
-        length = t_rev + 0.15 + dur(a) + 1.3
+        length = t_rev + 0.15 + dur(a) + 1.3 + self.extra / 2
 
         def draw(fr, d, tt):
             for i, (x, y) in enumerate(pos):
@@ -303,7 +304,7 @@ class MathLesson(M.Lesson):
         if it.get("rocket"):
             tl.sound(t_end, SFX_WHOOSH)
             t += 1.6
-        length = t + 1.4
+        length = t + 1.4 + self.extra
         cy = 450
 
         def hop_pos(tt):
@@ -352,7 +353,7 @@ class MathLesson(M.Lesson):
         a = self.num(ans)
         tl.sound(t_rev, SFX_DING)
         tl.sound(t_rev + 0.15, a)
-        length = t_rev + 0.15 + dur(a) + 1.3
+        length = t_rev + 0.15 + dur(a) + 1.3 + self.extra / 2
         cell = min(130, (W - 160) / len(seq) - 16)
         xs = [W / 2 + (i - (len(seq) - 1) / 2) * (cell + 16) for i in range(len(seq))]
         del prev
@@ -376,7 +377,7 @@ class MathLesson(M.Lesson):
         s = self.say(it["say"])
         tl.sound(0.05, SFX_POP)
         tl.sound(0.6, s)
-        length = 0.6 + dur(s) + 1.5
+        length = 0.6 + dur(s) + 1.5 + self.extra
         ex = it.get("example")   # [3, 5]
 
         def draw(fr, d, tt):
@@ -411,7 +412,7 @@ class MathLesson(M.Lesson):
         res = self.say(expr_sentence(a, "<", b))
         tl.sound(t_sign, SFX_DING)
         tl.sound(t_sign + 0.15, res)
-        length = t_sign + 0.15 + dur(res) + 1.7
+        length = t_sign + 0.15 + dur(res) + 1.7 + self.extra
 
         def draw(fr, d, tt):
             for r, (k, em, ts) in enumerate(((a, e, t1), (b, eb, t2))):
@@ -457,7 +458,7 @@ class MathLesson(M.Lesson):
             tl.sound(t_rev, SFX_DING)
             t_say = t_rev + 0.15
         tl.sound(t_say, sen)
-        length = t_say + dur(sen) + 1.8
+        length = t_say + dur(sen) + 1.8 + self.extra
         top, bl, br = (W / 2, 140), (W / 2 - 290, 590), (W / 2 + 290, 590)
 
         def draw(fr, d, tt):
@@ -551,7 +552,7 @@ class MathLesson(M.Lesson):
         sen = self.say(expr_sentence(a, op, b, c))
         tl.sound(t_say, sen)
         t = t_say + dur(sen)
-        length = t + 1.7
+        length = t + 1.7 + self.extra
 
         def draw(fr, d, tt):
             # эхний бүлэг
@@ -610,7 +611,7 @@ class MathLesson(M.Lesson):
         s = self.say(sen)
         tl.sound(t_rev, SFX_DING)
         tl.sound(t_rev + 0.15, s)
-        length = t_rev + 0.15 + dur(s) + 1.4
+        length = t_rev + 0.15 + dur(s) + 1.4 + self.extra / 2
         e = it.get("emoji")
 
         def draw(fr, d, tt):

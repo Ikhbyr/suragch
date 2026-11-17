@@ -3,6 +3,8 @@
   "type": "reading",
   "grade": 1,
   "lesson_number": 8,
+  "chimege": {"voice": "FEMALE4v2", "pitch": 1.05, "speed_narration": 1.0, "speed_reading": 0.85},
+  "repeat_extra": 0,
   "youtube_id": "46oMJQSWnYE",
   "facebook_time": 1794900000,
   "facebook_id": "985602427497247",

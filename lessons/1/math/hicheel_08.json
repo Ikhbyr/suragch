@@ -3,6 +3,8 @@
  "type": "math",
  "grade": 1,
  "lesson_number": 8,
+ "chimege": {"voice": "FEMALE4v2", "pitch": 1.05, "speed_narration": 1.0, "speed_reading": 0.85},
+ "repeat_extra": 0,
  "title": "Тоолж сурцгаая!",
  "topic": "Нэмэх (5 хүртэл)",
  "summary": "Нэмэх тэмдэгтэй танилцаж, тав хүртэлх тоог нэмж сурна.",

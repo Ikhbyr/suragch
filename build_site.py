@@ -115,14 +115,20 @@ def build_lesson(path):
         "syllables": [[{"t": s, "a": R(M.cap(s) + ".")} for s in g] for g in lesson.syllable_groups()],
         "words": [],
         "sentences": [],
+        "listen": [],
     }
     for ch in letters:
         i = info.get(ch, {})
         card = {"ch": ch, "a": N(i.get("say", f"{ch.upper()} үсэг."))}
         if i.get("example"):
-            card.update(example=i["example"], emoji=i.get("emoji", ""), ea=R(M.cap(i["example"]) + "."))
+            card.update(example=i["example"], emoji=i.get("emoji", ""), ea=R(M.cap(i["example"]) + "."),
+                        listen=bool(i.get("listen")))
         data["letter_cards"].append(card)
-    for w in cfg["words"]:
+    new = cfg.get("new_letters", "")
+    for w in cfg.get("listen_words", []):   # сонсоод олох үгс: шинэ үсгийг тодруулна
+        data["listen"].append({"w": w["w"], "a": R(M.cap(w["w"]) + "."), "emoji": w.get("emoji", ""),
+                               "hl": [i for i, c in enumerate(w["w"]) if c.lower() in new]})
+    for w in cfg.get("words", []):
         syl = w.get("syl") or [w["w"]]
         item = {"w": w["w"], "a": R(M.cap(w["w"]) + "."), "emoji": w.get("emoji", ""),
                 "syl": [{"t": s, "a": R(M.cap(s) + ".")} if len(syl) > 1 else {"t": s} for s in syl]}

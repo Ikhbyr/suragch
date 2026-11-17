@@ -3,8 +3,9 @@
   "chimege": {
     "voice": "FEMALE4v2",
     "pitch": 1.05,
-    "speed_narration": 1.0,
-    "speed_reading": 0.85
+    "speed_narration": 0.88,
+    "speed_reading": 0.72
   },
-  "music_volume": 0.16
+  "music_volume": 0.16,
+  "repeat_extra": 1.3
 }

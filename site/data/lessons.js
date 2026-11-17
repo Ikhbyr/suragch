@@ -1,6 +1,1599 @@
 // build_site.py-аар үүсгэсэн. Гараар засах шаардлагагүй.
 window.LESSONS = [
  {
+  "id": "1-math-hicheel_01",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 1,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "eB3vv84Dkxc",
+  "video": "",
+  "chips": [
+   "1",
+   "2",
+   "3"
+  ],
+  "new_chips": [
+   "1",
+   "2",
+   "3"
+  ],
+  "topic": "1, 2, 3 тоо",
+  "nums": [
+   {
+    "n": 1,
+    "word": "нэг",
+    "emoji": "🍎",
+    "sa": "audio/77902134fae5a869.mp3"
+   },
+   {
+    "n": 2,
+    "word": "хоёр",
+    "emoji": "🐥",
+    "sa": "audio/0d1d1ba5f4108c12.mp3"
+   },
+   {
+    "n": 3,
+    "word": "гурав",
+    "emoji": "🎈",
+    "sa": "audio/e737923013b41da1.mp3"
+   }
+  ],
+  "problems": [],
+  "game": {
+   "kind": "count",
+   "max": 3
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_01.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_02",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 2,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_02.mp4",
+  "chips": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5"
+  ],
+  "new_chips": [
+   "4",
+   "5"
+  ],
+  "topic": "4, 5 тоо",
+  "nums": [
+   {
+    "n": 4,
+    "word": "дөрөв",
+    "emoji": "🐎",
+    "sa": "audio/1f849c21bca92f80.mp3"
+   },
+   {
+    "n": 5,
+    "word": "тав",
+    "emoji": "⭐",
+    "sa": "audio/99ab75ad26697faf.mp3"
+   }
+  ],
+  "problems": [],
+  "game": {
+   "kind": "count",
+   "max": 5
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_02.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_03",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 3,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_03.mp4",
+  "chips": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7"
+  ],
+  "new_chips": [
+   "6",
+   "7"
+  ],
+  "topic": "6, 7 тоо",
+  "nums": [
+   {
+    "n": 6,
+    "word": "зургаа",
+    "emoji": "🦋",
+    "sa": "audio/2a80c3f287d97d06.mp3"
+   },
+   {
+    "n": 7,
+    "word": "долоо",
+    "emoji": "🍬",
+    "sa": "audio/282c36bb3dc2f48e.mp3"
+   }
+  ],
+  "problems": [],
+  "game": {
+   "kind": "count",
+   "max": 7
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_03.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_04",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 4,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_04.mp4",
+  "chips": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9"
+  ],
+  "new_chips": [
+   "8",
+   "9"
+  ],
+  "topic": "8, 9 тоо",
+  "nums": [
+   {
+    "n": 8,
+    "word": "найм",
+    "emoji": "🍓",
+    "sa": "audio/371e552631dbe680.mp3"
+   },
+   {
+    "n": 9,
+    "word": "ес",
+    "emoji": "🎈",
+    "sa": "audio/3fcb8ee61432c909.mp3"
+   }
+  ],
+  "problems": [],
+  "game": {
+   "kind": "count",
+   "max": 9
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_04.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_05",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 5,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_05.mp4",
+  "chips": [
+   "0",
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "10"
+  ],
+  "new_chips": [
+   "0",
+   "10"
+  ],
+  "topic": "0 ба 10",
+  "nums": [
+   {
+    "n": 0,
+    "word": "тэг",
+    "emoji": "🍽️",
+    "sa": "audio/2bb1f0fbadf7f8e1.mp3"
+   },
+   {
+    "n": 10,
+    "word": "арав",
+    "emoji": "⭐",
+    "sa": "audio/c6509263c699a471.mp3"
+   }
+  ],
+  "problems": [],
+  "game": {
+   "kind": "count",
+   "max": 10
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_05.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_06",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 6,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_06.mp4",
+  "chips": [
+   "<",
+   "=",
+   ">"
+  ],
+  "new_chips": [
+   "<",
+   "=",
+   ">"
+  ],
+  "topic": "Их, бага, тэнцүү",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "3",
+     "<",
+     "5"
+    ],
+    "h": 1,
+    "emoji": "🍎",
+    "a": "audio/ab98f0017a3d80fa.mp3"
+   },
+   {
+    "t": [
+     "4",
+     ">",
+     "2"
+    ],
+    "h": 1,
+    "emoji": "🐟",
+    "a": "audio/0911fa38928fdc95.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "=",
+     "3"
+    ],
+    "h": 1,
+    "emoji": "🐥",
+    "a": "audio/bfe0d95c65e4f54f.mp3"
+   },
+   {
+    "t": [
+     "6",
+     ">",
+     "4"
+    ],
+    "h": 1,
+    "emoji": "🌸",
+    "a": "audio/27707a3502145154.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "<",
+     "5"
+    ],
+    "h": 1,
+    "emoji": "🚗",
+    "a": "audio/f567474d1bd58145.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "=",
+     "4"
+    ],
+    "h": 1,
+    "emoji": "⭐",
+    "a": "audio/6a36ef842a2dc305.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "<",
+     "4"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/88f832cea04c2810.mp3"
+   },
+   {
+    "t": [
+     "5",
+     ">",
+     "3"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/51c3662e6894f114.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "=",
+     "4"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/6a36ef842a2dc305.mp3"
+   },
+   {
+    "t": [
+     "7",
+     "<",
+     "9"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/4b6f0a565368e512.mp3"
+   },
+   {
+    "t": [
+     "8",
+     ">",
+     "6"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/d078802d0f9d8295.mp3"
+   }
+  ],
+  "game": {
+   "kind": "compare",
+   "max": 9
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_06.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_07",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 7,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_07.mp4",
+  "chips": [
+   "2",
+   "3",
+   "4",
+   "5"
+  ],
+  "new_chips": [],
+  "topic": "Тоог задлах",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "2",
+     "→",
+     "1",
+     "ба",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🔵",
+    "a": "audio/6193335a33fa5af1.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "→",
+     "1",
+     "ба",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/17f967fef1304e89.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "→",
+     "2",
+     "ба",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/6220b65ec59bab07.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "→",
+     "2",
+     "ба",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/ad3998c1a2c7950a.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "→",
+     "3",
+     "ба",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🌸",
+    "a": "audio/11c6a61f65b1142a.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "→",
+     "2",
+     "ба",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/f09ae5a0c0e62101.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "→",
+     "4",
+     "ба",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/b34fb67092152b57.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "→",
+     "1",
+     "ба",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🍓",
+    "a": "audio/68c43aa4fbadd080.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "→",
+     "1",
+     "ба",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/2bbc2cf0f00b2731.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "→",
+     "3",
+     "ба",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🐞",
+    "a": "audio/df08feea252b0148.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "→",
+     "1",
+     "ба",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🚗",
+    "a": "audio/17f967fef1304e89.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "→",
+     "4",
+     "ба",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/b34fb67092152b57.mp3"
+   }
+  ],
+  "game": {
+   "kind": "split",
+   "max": 5
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_07.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_08",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 8,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_08.mp4",
+  "chips": [
+   "1",
+   "+",
+   "2",
+   "=",
+   "3"
+  ],
+  "new_chips": [
+   "+"
+  ],
+  "topic": "Нэмэх (5 хүртэл)",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "1",
+     "+",
+     "1",
+     "=",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/5026191d2ce53652.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "+",
+     "1",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/b8c05a166ba8a6c4.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "+",
+     "2",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/c63a631170a3e643.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "+",
+     "1",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/77bf4ad8b57caa2e.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "+",
+     "2",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/946205d51475b199.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "+",
+     "1",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "🍓",
+    "a": "audio/e1ed49af29a224c5.mp3"
+   },
+   {
+    "t": [
+     "1",
+     "+",
+     "2",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/998f90b16639974e.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "+",
+     "3",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/da89b9c589bf6b4d.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "+",
+     "1",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/e1ed49af29a224c5.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "+",
+     "2",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/c63a631170a3e643.mp3"
+   },
+   {
+    "t": [
+     "1",
+     "+",
+     "3",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/e7223d2586569a51.mp3"
+   }
+  ],
+  "game": {
+   "kind": "add",
+   "max": 4
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_08.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_09",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 9,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_09.mp4",
+  "chips": [
+   "5",
+   "+",
+   "3",
+   "=",
+   "8"
+  ],
+  "new_chips": [],
+  "topic": "Нэмэх (10 хүртэл)",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "5",
+     "+",
+     "1",
+     "=",
+     "6"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/f11a392959e2ffaf.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "+",
+     "3",
+     "=",
+     "7"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/7994e048045337a4.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "+",
+     "2",
+     "=",
+     "8"
+    ],
+    "h": 4,
+    "emoji": "🌸",
+    "a": "audio/32ac0f4a901c1292.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "+",
+     "5",
+     "=",
+     "10"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/9336a21d1fed1e53.mp3"
+   },
+   {
+    "t": [
+     "7",
+     "+",
+     "3",
+     "=",
+     "10"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/253cc56c3709261f.mp3"
+   },
+   {
+    "t": [
+     "8",
+     "+",
+     "1",
+     "=",
+     "9"
+    ],
+    "h": 4,
+    "emoji": "🚗",
+    "a": "audio/fd66d6891901bf83.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "+",
+     "3",
+     "=",
+     "9"
+    ],
+    "h": 4,
+    "emoji": "🍓",
+    "a": "audio/778dce0287386af9.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "+",
+     "4",
+     "=",
+     "9"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/92854caf31e054bf.mp3"
+   },
+   {
+    "t": [
+     "7",
+     "+",
+     "2",
+     "=",
+     "9"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/eb11ad28a7fab16c.mp3"
+   },
+   {
+    "t": [
+     "8",
+     "+",
+     "2",
+     "=",
+     "10"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/ca17c630c17a33b6.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "+",
+     "4",
+     "=",
+     "7"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/705f61e4a8c67551.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "+",
+     "6",
+     "=",
+     "8"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/2f28cdaf3316c0dc.mp3"
+   }
+  ],
+  "game": {
+   "kind": "add",
+   "max": 8
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_09.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_10",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 10,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_10.mp4",
+  "chips": [
+   "5",
+   "−",
+   "2",
+   "=",
+   "3"
+  ],
+  "new_chips": [
+   "−"
+  ],
+  "topic": "Хасах (5 хүртэл)",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "2",
+     "−",
+     "1",
+     "=",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/5a2c742fa40f840d.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "−",
+     "1",
+     "=",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/d8d0f5c5558e0c22.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "−",
+     "2",
+     "=",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/5cf61c0be143260b.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "−",
+     "2",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/bffcb00d9abca245.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "−",
+     "3",
+     "=",
+     "2"
+    ],
+    "h": 4,
+    "emoji": "🐥",
+    "a": "audio/274cc16ce42e7716.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "−",
+     "1",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🍓",
+    "a": "audio/cb9a957261feab3f.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "−",
+     "2",
+     "=",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/5548798967282d0c.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "−",
+     "1",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/d7abd960230771a7.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "−",
+     "3",
+     "=",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/4f0c8da2804e5f9b.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "−",
+     "4",
+     "=",
+     "1"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/779cf40e17b50f37.mp3"
+   },
+   {
+    "t": [
+     "2",
+     "−",
+     "2",
+     "=",
+     "0"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/b4dc7591dd33c1b7.mp3"
+   }
+  ],
+  "game": {
+   "kind": "sub",
+   "max": 5
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_10.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_11",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 11,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_11.mp4",
+  "chips": [
+   "9",
+   "−",
+   "4",
+   "=",
+   "5"
+  ],
+  "new_chips": [],
+  "topic": "Хасах (10 хүртэл)",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "6",
+     "−",
+     "2",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/fb673b358b129bf8.mp3"
+   },
+   {
+    "t": [
+     "7",
+     "−",
+     "3",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🌸",
+    "a": "audio/fd81ba174083dd8f.mp3"
+   },
+   {
+    "t": [
+     "8",
+     "−",
+     "4",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/7824ca29151b0051.mp3"
+   },
+   {
+    "t": [
+     "10",
+     "−",
+     "5",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/06366fcc8d233fb9.mp3"
+   },
+   {
+    "t": [
+     "9",
+     "−",
+     "6",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/d6046220769be931.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "−",
+     "6",
+     "=",
+     "0"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/290e5a08d7da3893.mp3"
+   },
+   {
+    "t": [
+     "7",
+     "−",
+     "2",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "🍓",
+    "a": "audio/7471923cf0e2c3f4.mp3"
+   },
+   {
+    "t": [
+     "9",
+     "−",
+     "3",
+     "=",
+     "6"
+    ],
+    "h": 4,
+    "emoji": "🐟",
+    "a": "audio/cc176f3dd3b4c586.mp3"
+   },
+   {
+    "t": [
+     "10",
+     "−",
+     "4",
+     "=",
+     "6"
+    ],
+    "h": 4,
+    "emoji": "⭐",
+    "a": "audio/ec47754a0bfc05fc.mp3"
+   },
+   {
+    "t": [
+     "8",
+     "−",
+     "5",
+     "=",
+     "3"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/6f671fa5bbe897f3.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "−",
+     "1",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/3203402937110d95.mp3"
+   },
+   {
+    "t": [
+     "10",
+     "−",
+     "10",
+     "=",
+     "0"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/e0d1a25442b69488.mp3"
+   }
+  ],
+  "game": {
+   "kind": "sub",
+   "max": 10
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_11.png",
+  "added": 1794905948
+ },
+ {
+  "id": "1-math-hicheel_12",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 12,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "",
+  "video": "videos/1-math-hicheel_12.mp4",
+  "chips": [
+   "+",
+   "−",
+   "<",
+   ">",
+   "="
+  ],
+  "new_chips": [],
+  "topic": "Давтлага, бодлого",
+  "nums": [],
+  "problems": [
+   {
+    "t": [
+     "6",
+     "<",
+     "8"
+    ],
+    "h": 1,
+    "emoji": "🍎",
+    "a": "audio/dfd62dd306cb9c67.mp3"
+   },
+   {
+    "t": [
+     "3",
+     "+",
+     "2",
+     "=",
+     "5"
+    ],
+    "h": 4,
+    "emoji": "🍎",
+    "a": "audio/946205d51475b199.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "−",
+     "2",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "🎈",
+    "a": "audio/fb673b358b129bf8.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "+",
+     "4",
+     "=",
+     "8"
+    ],
+    "h": 4,
+    "emoji": "🐑",
+    "a": "audio/91aa6ebae04f51cb.mp3"
+   },
+   {
+    "t": [
+     "10",
+     "−",
+     "4",
+     "=",
+     "6"
+    ],
+    "h": 4,
+    "emoji": "🍪",
+    "a": "audio/ec47754a0bfc05fc.mp3"
+   },
+   {
+    "t": [
+     "4",
+     "+",
+     "3",
+     "=",
+     "7"
+    ],
+    "h": 4,
+    "emoji": "",
+    "a": "audio/7994e048045337a4.mp3"
+   },
+   {
+    "t": [
+     "9",
+     "−",
+     "5",
+     "=",
+     "4"
+    ],
+    "h": 4,
+    "emoji": "",
+    "a": "audio/d106fa2e32a296e8.mp3"
+   },
+   {
+    "t": [
+     "6",
+     "<",
+     "8"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/dfd62dd306cb9c67.mp3"
+   },
+   {
+    "t": [
+     "5",
+     "+",
+     "5",
+     "=",
+     "10"
+    ],
+    "h": 4,
+    "emoji": "",
+    "a": "audio/9336a21d1fed1e53.mp3"
+   },
+   {
+    "t": [
+     "8",
+     "−",
+     "8",
+     "=",
+     "0"
+    ],
+    "h": 4,
+    "emoji": "",
+    "a": "audio/1ca9c024cb363ef0.mp3"
+   },
+   {
+    "t": [
+     "7",
+     ">",
+     "2"
+    ],
+    "h": 1,
+    "emoji": "",
+    "a": "audio/a6d34aaf78fca97f.mp3"
+   }
+  ],
+  "game": {
+   "kind": "mix",
+   "max": 10
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_12.png",
+  "added": 1794905948
+ },
+ {
   "id": "hicheel_06",
   "subject": "mongol",
   "type": "reading",
@@ -284,7 +1877,8 @@ window.LESSONS = [
     "emoji": "👄"
    }
   ],
-  "poster": "img/hicheel_06.png"
+  "poster": "img/hicheel_06.png",
+  "added": 1794826144
  },
  {
   "id": "hicheel_07",
@@ -663,7 +2257,8 @@ window.LESSONS = [
     "emoji": "🪮"
    }
   ],
-  "poster": "img/hicheel_07.png"
+  "poster": "img/hicheel_07.png",
+  "added": 1794820578
  },
  {
   "id": "hicheel_08",
@@ -1026,6 +2621,7 @@ window.LESSONS = [
     "emoji": "🪮"
    }
   ],
-  "poster": "img/hicheel_08.png"
+  "poster": "img/hicheel_08.png",
+  "added": 1794824440
  }
 ];

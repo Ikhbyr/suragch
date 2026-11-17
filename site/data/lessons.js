@@ -136,8 +136,8 @@ window.LESSONS = [
   "grade": 1,
   "number": 3,
   "title": "Тоолж сурцгаая!",
-  "youtube_id": "",
-  "video": "videos/1-math-hicheel_03.mp4",
+  "youtube_id": "0ZoJRnaLWtY",
+  "video": "",
   "chips": [
    "1",
    "2",

@@ -5,3 +5,5 @@ __pycache__/
 *.wav
 .chimege_token
 samples/
+client_secret*.json
+.youtube_token.json

@@ -985,6 +985,8 @@ def write_youtube(cfg, chapters, name, root, bg):
     chap = "\n".join(f"{int(t // 60)}:{int(t % 60):02d} {n}" for t, n in chapters)
     grade = cfg.get("grade", 1)
     title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | {grade}-р анги | {BRAND}"
+    if len(title) > 100:  # YouTube-ийн хязгаар: үсэг олон болоход зөвхөн шинэ үсгээ бичнэ
+        title = f"Уншиж сурцгаая! {num}-р хичээл: шинэ үсэг {new.upper()} | {grade}-р анги | {BRAND}"
     desc = "\n".join([
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
         f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина.",

@@ -78,6 +78,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
   text-align: center;
 }
 .foot p { max-width: 62ch; margin: 0 auto; }
+.foot-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin-top: 10px !important; }
+.foot-links a { color: #fff; font-weight: 800; text-decoration: none; }
+.foot-links a:hover, .foot-links a:focus-visible { text-decoration: underline; }
+
+/* ------------------------------------------------ дэмжих */
+.support { max-width: 640px; }
+.support > p { margin: 0 0 var(--line); font-size: 19px; font-weight: 700; line-height: var(--line); }
+.bank { margin: 0; background: #fff; border: 3px solid #dbe3f0; border-radius: var(--radius-tile); padding: 6px 20px; }
+.bank-row { display: grid; grid-template-columns: 9.5em 1fr; gap: 4px 14px; align-items: center; padding: 12px 0; }
+.bank-row + .bank-row { border-top: 2px dashed var(--rule); }
+.bank dt { color: var(--ink-soft); font-weight: 800; }
+.bank dd { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 20px; font-weight: 900; word-break: break-all; }
+.copy { border: 0; border-radius: 999px; padding: 6px 14px; background: var(--leaf-soft); color: #23743a; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.copy:focus-visible { outline: 3px solid var(--cover); outline-offset: 2px; }
+@media (max-width: 720px) { .bank-row { grid-template-columns: 1fr; } }
 
 /* ------------------------------------------------ үсгийн өнгө */
 .v { color: var(--vowel); }

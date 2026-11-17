@@ -119,11 +119,48 @@
     const [id, tab] = location.hash.replace(/^#\/?/, "").split("/");
     const lesson = LESSONS.find((l) => l.id === id);
     if (id === "g" && GRADES.includes(Number(tab))) gradeView(Number(tab));
+    else if (id === "support" && SUPPORT.account) supportView();
     else if (lesson) lessonView(lesson, TABS.some((t) => t[0] === tab) ? tab : "video");
     else home();
     window.scrollTo(0, 0);
   }
   window.addEventListener("hashchange", route);
+
+  // ------------------------------------------------ дэмжих
+  const SUPPORT = window.SUPPORT || {};
+  const supportLink = document.getElementById("support-link");
+  if (supportLink && SUPPORT.account) supportLink.hidden = false;
+
+  function supportView() {
+    document.title = `Дэмжих | ${BRAND}`;
+    const rows = [
+      ["Банк", SUPPORT.bank],
+      ["Данс", SUPPORT.account, true],
+      ["IBAN", SUPPORT.iban, true],
+      ["Хүлээн авагч", SUPPORT.name],
+      ["Гүйлгээний утга", SUPPORT.note, true],
+    ].filter((r) => r[1]);
+    app.innerHTML = `
+      <div class="lesson-head">
+        <a class="btn ghost back" href="#/">← Нүүр</a>
+        <h1>💛 Дэмжих <small>Эцэг эх, том хүмүүст</small></h1>
+      </div>
+      <div class="support">
+        <p>«${BRAND}» сайтын хичээл, видео бүгд үнэгүй. Шинэ хичээл бэлтгэхэд дэмжлэг үзүүлэхийг хүсвэл доорх дансаар хандив өгч болно. Хэмжээ хамаагүй, баярлалаа!</p>
+        <dl class="bank">
+          ${rows.map(([k, v, copy]) => `
+            <div class="bank-row">
+              <dt>${esc(k)}</dt>
+              <dd><span>${esc(v)}</span>${copy ? `<button class="copy" data-copy="${esc(v)}">Хуулах</button>` : ""}</dd>
+            </div>`).join("")}
+        </dl>
+      </div>`;
+    $$(".copy").forEach((b) => b.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Хуулсан ✓"; }
+      catch (e) { b.textContent = "Гараар хуулна уу"; }
+      setTimeout(() => { b.textContent = "Хуулах"; }, 1800);
+    }));
+  }
 
   // ------------------------------------------------ нүүр
   function lessonRow(l, showPlace) {

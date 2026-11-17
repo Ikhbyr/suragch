@@ -5,6 +5,7 @@
     python publish.py lessons/hicheel_09.json          # бүх алхам
     python publish.py lessons/hicheel_09.json --no-push # git push хийхгүй
     python publish.py --sync                           # зөвхөн playlist-ийн дарааллыг засна
+    python publish.py --pending                        # YouTube-д ороогүй бүх хичээлийг дарааллаар нь
 
 Алхмууд:
   1. Бичлэг, YouTube мэдээлэл (гарчиг, тайлбар, thumbnail) байхгүй бол make_lesson.py-аар үүсгэнэ
@@ -229,19 +230,21 @@ def sync_playlists(yt):
 
 
 # ------------------------------------------------ үндсэн
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if "--sync" in sys.argv:
-        return sync_playlists(youtube())
-    if len(args) != 1:
-        sys.exit(__doc__)
-    path = os.path.abspath(args[0])
+def pending_lessons():
+    """YouTube-д ороогүй хичээлүүд: анги, хичээл, дугаарын дарааллаар."""
+    out = []
+    for p in glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True):
+        cfg = M.load_cfg(p)
+        if not cfg.get("youtube_id"):
+            out.append(((cfg.get("grade", 1), cfg.get("subject", ""), cfg.get("lesson_number") or 0), p))
+    return [p for _, p in sorted(out)]
+
+
+def publish_one(path, yt=None):
+    """Нэг хичээлийг нийтэлнэ. YouTube-ийн өдрийн хязгаарт хүрвэл False буцаана."""
+    from googleapiclient.errors import HttpError
     cfg = M.load_cfg(path)
     name = M.lesson_id(path)
-    if cfg.get("youtube_id") and "--force" not in sys.argv:
-        sys.exit(f"Энэ хичээл аль хэдийн YouTube-д байна: https://youtu.be/{cfg['youtube_id']}\n"
-                 "Дахин оруулах бол --force, зөвхөн playlist засах бол --sync.")
-
     rel = os.path.relpath(path, ROOT)
     mp4 = os.path.join(ROOT, "videos", name + ".mp4")
     meta = os.path.join(ROOT, "youtube", name + "_youtube.txt")
@@ -253,10 +256,16 @@ def main():
         run(sys.executable, "make_lesson.py", rel, "--youtube")
     title, desc, tags = parse_meta(meta)
 
-    yt = youtube()
+    yt = yt or youtube()
     privacy = cfg.get("youtube_privacy", "public")
     print(f"YouTube руу оруулж байна: {title}")
-    resp = upload(yt, mp4, title, desc, tags, privacy)
+    try:
+        resp = upload(yt, mp4, title, desc, tags, privacy)
+    except HttpError as e:
+        if "uploadLimitExceeded" in str(e) or "quotaExceeded" in str(e):
+            print("  YouTube-ийн өдрийн хязгаарт хүрлээ. Маргааш дахин ажиллуулна уу: python publish.py --pending")
+            return False
+        raise
     vid = resp["id"]
     set_youtube_id(path, vid)   # дараагийн алхам алдаа гарсан ч давхар оруулахгүй
     print(f"  Оруулсан: https://youtu.be/{vid} ({resp['status'].get('privacyStatus')})")
@@ -269,8 +278,35 @@ def main():
         run("git", "commit", "-q", "-m", f"{cfg.get('lesson_number', '')}-р хичээл YouTube-д нийтлэв ({vid})")
         run("git", "push", "-q")
         print("Сайт хэдэн минутын дараа шинэчлэгдэнэ: https://suragch.cloud/")
-    print("\nБэлэн! Анхаар: Google API аудит хийгдээгүй бол бичлэг 'Private' болж түгжигдэнэ.")
-    print(f"Тэгвэл Studio дээр Public болгоно: https://studio.youtube.com/video/{vid}/edit")
+    if resp["status"].get("privacyStatus") != privacy:
+        print(f"  Анхаар: бичлэг {resp['status'].get('privacyStatus')} болсон. Studio дээр шалгана уу: "
+              f"https://studio.youtube.com/video/{vid}/edit")
+    return True
+
+
+def main():
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if "--sync" in sys.argv:
+        return sync_playlists(youtube())
+    if "--pending" in sys.argv:
+        todo = pending_lessons()
+        print(f"YouTube-д ороогүй {len(todo)} хичээл байна.")
+        yt = youtube() if todo else None
+        for i, p in enumerate(todo):
+            print(f"\n== {os.path.relpath(p, ROOT)}")
+            if not publish_one(p, yt):
+                print(f"Үлдсэн: {len(todo) - i} хичээл.")
+                return
+        print("\nБүгд нийтлэгдлээ.")
+        return
+    if len(args) != 1:
+        sys.exit(__doc__)
+    path = os.path.abspath(args[0])
+    cfg = M.load_cfg(path)
+    if cfg.get("youtube_id") and "--force" not in sys.argv:
+        sys.exit(f"Энэ хичээл аль хэдийн YouTube-д байна: https://youtu.be/{cfg['youtube_id']}\n"
+                 "Дахин оруулах бол --force, зөвхөн playlist засах бол --sync.")
+    publish_one(path)
 
 
 if __name__ == "__main__":

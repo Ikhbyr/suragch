@@ -62,7 +62,12 @@ python publish.py lessons/1/math/hicheel_01.json
 ```
 python publish.py lessons/hicheel_09.json   # видео үүсгэх → YouTube → thumbnail → playlist → сайт → push
 python publish.py --sync                    # зөвхөн playlist-ийн дарааллыг засна
+python publish.py --pending                 # YouTube-д ороогүй бүх хичээлийг дарааллаар нь
 ```
+
+- Шинэ суваг өдөрт цөөн бичлэг оруулах хязгаартай (`uploadLimitExceeded`). Хязгаарт хүрвэл скрипт
+  зогсоно. Маргааш нь `--pending`-ээр үлдсэнийг нь оруулна.
+- YouTube-д ороогүй хичээлийн видео сайт дээр MP4-өөр тоглоно.
 
 - Хичээлүүд «1-р анги монгол хэл» гэх мэт анги + хичээлийн playlist-д дугаарын дарааллаар орно.
   Тийм нэртэй playlist байхгүй бол скрипт шинээр үүсгэнэ.

@@ -136,9 +136,9 @@
 
   function route() {
     stopAll();
-    const [id, tab] = location.hash.replace(/^#\/?/, "").split("/");
+    const [id, tab, sub] = location.hash.replace(/^#\/?/, "").split("/");
     const lesson = LESSONS.find((l) => l.id === id);
-    if (id === "g" && GRADES.includes(Number(tab))) gradeView(Number(tab));
+    if (id === "g" && GRADES.includes(Number(tab))) gradeView(Number(tab), sub);
     else if (id === "support" && SUPPORT.account) supportView();
     else if (lesson) lessonView(lesson, tabsOf(lesson).some((t) => t[0] === tab) ? tab : "video");
     else home();
@@ -183,29 +183,72 @@
   }
 
   // ------------------------------------------------ нүүр
-  function lessonRow(l, showPlace) {
-    const body = l.type === "math"
-      ? `<div class="lesson-title">${esc(l.topic)}</div>${chipRow(l, l.topic)}`
-      : l.letters ? chipRow(l, `Үсгүүд: ${[...l.letters].join(", ")}`)
-      : `<div class="lesson-title">${esc(l.title || "")}</div>`;
-    return `
-      <li class="lesson-row">
-        <span class="lesson-num" aria-hidden="true">${l.number}</span>
-        <div>${body}${showPlace ? `<small>${l.grade}-р анги, ${subjectName(l.subject)}</small>` : ""}</div>
-        <a class="btn" href="#/${l.id}">▶ ${l.number}-р хичээл</a>
-      </li>`;
+  // ------------------------------------------------ явц (энэ хөтөч дээр л хадгалагдана)
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("suragch." + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("suragch." + k, JSON.stringify(v)); } catch (e) { /* хувийн цонх */ } },
+  };
+  const seenSet = () => new Set(store.get("seen", []));
+  const markSeen = (id) => { const s = seenSet(); if (!s.has(id)) { s.add(id); store.set("seen", [...s]); } };
+  const byNumber = (a, b) => (a.number || 0) - (b.number || 0);
+  const subjectLessons = (g, k) => LESSONS.filter((l) => l.grade === g && l.subject === k).sort(byNumber);
+  // дараагийн хичээл: үзсэн хамгийн сүүлийн хичээлийн дараах, үзээгүй эхнийх
+  const nextLesson = (list, seen) => {
+    let last = -1;
+    list.forEach((l, i) => { if (seen.has(l.id)) last = i; });
+    return list.slice(last + 1).find((l) => !seen.has(l.id)) || list.find((l) => !seen.has(l.id)) || null;
+  };
+  const SUBJECT_COLORS = { mongol: "#2b67d8", math: "#3fa65a", orchin: "#ef8a2a", baigal: "#0b9aa8",
+                           niigem: "#8c36aa", english: "#d92b2b", art: "#dd4479", music: "#e0a100", pe: "#1f4fb0" };
+
+  // ------------------------------------------------ хичээлийн карт
+  function cardGlyph(l) {
+    if (l.type === "math") {
+      const nw = l.new_chips || [];
+      const c = nw.length && nw.every((x) => /^[0-9]+$/.test(x)) ? nw : l.chips;   // шинэ тоо, эсвэл илэрхийлэл
+      const txt = c.length <= 5 ? c.join(" ") : `${c[0]}–${c[c.length - 1]}`;
+      return `<span class="glyph${txt.length > 5 ? " small" : ""}">${[...txt].map((ch) => (ch === " " ? " " : colorize(ch))).join("")}</span>`;
+    }
+    const nw = l.new || "";
+    return `<span class="glyph">${nw ? colorize(nw.toUpperCase() + nw) : colorize([...l.letters].slice(-1)[0] || "")}</span>`;
+  }
+  const LETTER_NAMES = { "й": "Хагас и" };
+  const cardCaption = (l) => (l.type === "math" ? l.topic
+    : l.new ? `${LETTER_NAMES[l.new] || l.new.toUpperCase()} үсэг` : l.title || "");
+
+  function lessonCard(l, opts = {}) {
+    const cls2 = ["tile", "lcard", opts.seen ? "seen" : "", opts.next ? "next" : ""].join(" ").trim();
+    return `<li><a class="${cls2}" href="#/${l.id}" style="--sc:${SUBJECT_COLORS[l.subject] || "#56608a"}"
+        aria-label="${l.number}-р хичээл: ${esc(cardCaption(l))}${opts.seen ? ", үзсэн" : ""}">
+      <span class="lnum">${l.number}</span>
+      ${opts.seen ? `<span class="mark" aria-hidden="true">✓</span>` : ""}
+      ${opts.next ? `<span class="flag">Дараагийнх</span>` : ""}
+      ${cardGlyph(l)}
+      <span class="lcap">${esc(cardCaption(l))}</span>
+      ${opts.place ? `<span class="lsub">${l.grade}-р анги, ${subjectName(l.subject)}</span>` : ""}
+    </a></li>`;
   }
 
   function home() {
     document.title = `${BRAND} | Бага ангийн хичээл`;
     const h1 = [...BRAND].map((ch, i) =>
       `<span class="tw ${cls(ch)}" style="animation-delay:${i * 60}ms">${esc(ch)}</span>`).join("");
-    const latest = LESSONS.slice().sort((a, b) => (b.added || 0) - (a.added || 0) || b.number - a.number).slice(0, 5);
+    const seen = seenSet();
+    const latest = LESSONS.slice().sort((a, b) => (b.added || 0) - (a.added || 0) || b.number - a.number).slice(0, 4);
+    // үргэлжлүүлэх: хамгийн сүүлд үзсэн хичээлийн хичээлийн дараагийнх
+    const lastId = store.get("last", "");
+    const last = LESSONS.find((l) => l.id === lastId);
+    const cont = last ? nextLesson(subjectLessons(last.grade, last.subject), seen) : null;
     app.innerHTML = `
       <header class="hero">
         <h1 aria-label="${BRAND}">${h1}</h1>
         <p>Бага ангийн хүүхдэд зориулсан хичээлүүд</p>
       </header>
+      ${cont ? `<a class="continue tile" href="#/${cont.id}" style="--sc:${SUBJECT_COLORS[cont.subject] || "#56608a"}">
+          ${cardGlyph(cont)}
+          <span><b>Үргэлжлүүлэх</b><br>${subjectName(cont.subject)}, ${cont.number}-р хичээл: ${esc(cardCaption(cont))}</span>
+          <span class="go" aria-hidden="true">▶</span>
+        </a>` : ""}
       <h2 class="sec-title">Ангиа сонгоорой</h2>
       <nav class="grade-grid" aria-label="Ангиуд">
         ${GRADES.map((g, i) => {
@@ -217,26 +260,39 @@
         }).join("")}
       </nav>
       ${latest.length ? `<h2 class="sec-title">Шинэ хичээлүүд</h2>
-        <ol class="lesson-list">${latest.map((l) => lessonRow(l, true)).join("")}</ol>` : ""}`;
+        <ul class="lesson-grid">${latest.map((l) => lessonCard(l, { place: true, seen: seen.has(l.id) })).join("")}</ul>` : ""}`;
   }
 
-  function gradeView(g) {
+  function gradeView(g, subj) {
     document.title = `${g}-р анги | ${BRAND}`;
     const inGrade = LESSONS.filter((l) => l.grade === g);
     const keys = [...new Set([...SUBJECTS.map((s) => s[0]), ...inGrade.map((l) => l.subject)])]
       .filter((k) => inGrade.some((l) => l.subject === k));
+    const saved = store.get(`subj${g}`, "");
+    const cur = keys.includes(subj) ? subj : keys.includes(saved) ? saved : keys[0];
+    if (cur) store.set(`subj${g}`, cur);
+    const list = cur ? subjectLessons(g, cur) : [];
+    const seen = seenSet();
+    const nxt = nextLesson(list, seen);
+    const done = list.filter((l) => seen.has(l.id)).length;
     app.innerHTML = `
       <div class="lesson-head">
         <a class="btn ghost back" href="#/">← Нүүр</a>
         <h1>${g}-р анги</h1>
       </div>
-      ${keys.map((k) => {
-        const [, ico, name] = subjectOf(k);
-        return `<section class="subject">
-          <h2 class="subject-title"><span aria-hidden="true">${ico}</span> ${name}</h2>
-          <ol class="lesson-list">${inGrade.filter((l) => l.subject === k).map((l) => lessonRow(l)).join("")}</ol>
-        </section>`;
-      }).join("")}
+      ${keys.length ? `<div class="tabs subj-tabs" role="tablist" aria-label="Хичээлүүд">
+        ${keys.map((k) => {
+          const [, ico, name] = subjectOf(k);
+          return `<a class="tab" role="tab" href="#/g/${g}/${k}" aria-selected="${k === cur}" style="--tabc:${SUBJECT_COLORS[k] || "#56608a"}">
+            <span class="ico" aria-hidden="true">${ico}</span><span>${name}</span><span class="cnt">${inGrade.filter((l) => l.subject === k).length}</span>
+          </a>`;
+        }).join("")}
+      </div>
+      <div class="subj-head">
+        <p class="progress-note">${done ? `${list.length} хичээлээс ${done}-ийг үзсэн` : `${list.length} хичээл. 1-р хичээлээс эхлээрэй.`}</p>
+        ${nxt ? `<a class="btn" href="#/${nxt.id}">▶ ${done ? "Үргэлжлүүлэх" : "Эхлэх"}: ${nxt.number}-р хичээл</a>` : ""}
+      </div>
+      <ul class="lesson-grid">${list.map((l) => lessonCard(l, { seen: seen.has(l.id), next: nxt && l.id === nxt.id })).join("")}</ul>` : ""}
       <p class="soon">${keys.length ? "Бусад хичээлүүд удахгүй нэмэгдэнэ." : "Энэ ангийн хичээлүүд удахгүй нэмэгдэнэ."}</p>`;
   }
 
@@ -246,7 +302,7 @@
     document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${what} | ${BRAND}`;
     app.innerHTML = `
       <div class="lesson-head">
-        <a class="btn ghost back" href="#/g/${l.grade}">← ${l.grade}-р анги</a>
+        <a class="btn ghost back" href="#/g/${l.grade}/${l.subject}">← ${l.grade}-р анги</a>
         <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}${l.type === "math" ? `: ${esc(l.topic)}` : ""}</small></h1>
         ${chipRow(l, l.type === "math" ? l.topic : "Үсгүүд")}
       </div>
@@ -259,6 +315,18 @@
       <section class="panel" role="tabpanel"></section>`;
     $$(".tab").forEach((b) => b.addEventListener("click", () => { location.hash = `#/${l.id}/${b.dataset.tab}`; }));
     const panel = $(".panel");
+    markSeen(l.id);
+    store.set("last", l.id);
+    const sibs = subjectLessons(l.grade, l.subject);
+    const k = sibs.findIndex((x) => x.id === l.id);
+    const prev = sibs[k - 1], next = sibs[k + 1];
+    if (prev || next) {
+      panel.insertAdjacentHTML("afterend", `<nav class="lesson-nav" aria-label="Хичээлүүд">
+        ${prev ? `<a class="btn ghost" href="#/${prev.id}">← ${prev.number}-р хичээл</a>` : "<span></span>"}
+        <a class="btn ghost" href="#/g/${l.grade}/${l.subject}">☰ Бүх хичээл</a>
+        ${next ? `<a class="btn" href="#/${next.id}">${next.number}-р хичээл →</a>` : "<span></span>"}
+      </nav>`);
+    }
     const panels = l.type === "math"
       ? { video: videoPanel, nums: numsPanel, prob: probPanel, game: mathGamePanel }
       : { video: videoPanel, letters: lettersPanel, syl: sylPanel, words: wordsPanel, sent: sentPanel, game: gamePanel };

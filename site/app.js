@@ -134,6 +134,16 @@
   const subjectOf = (k) => SUBJECTS.find((s) => s[0] === k) || [k, "📘", k];
   const subjectName = (k) => subjectOf(k)[2];
 
+  // Зочдын статистик (GoatCounter): #/1-math-hicheel_01/game -> /1-math-hicheel_01/game
+  function track() {
+    const path = "/" + location.hash.replace(/^#\/?/, "");
+    const send = () => {
+      try { window.goatcounter.count({ path, title: document.title }); } catch (e) { /* хаагдсан эсвэл ачаалаагүй */ }
+    };
+    if (window.goatcounter && window.goatcounter.count) send();
+    else window.addEventListener("load", () => setTimeout(send, 0), { once: true });
+  }
+
   function route() {
     stopAll();
     const [id, tab, sub] = location.hash.replace(/^#\/?/, "").split("/");
@@ -143,6 +153,7 @@
     else if (lesson) lessonView(lesson, tabsOf(lesson).some((t) => t[0] === tab) ? tab : "video");
     else home();
     window.scrollTo(0, 0);
+    track();
   }
   window.addEventListener("hashchange", route);
 

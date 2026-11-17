@@ -96,9 +96,13 @@ def build_lesson(path):
                 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-ac", "1", "-b:a", "64k", dst], check=True)
         used.add(os.path.basename(dst))
     vid = os.path.join(ROOT, "videos", name + ".mp4")
-    if os.path.exists(vid):
+    site_vid = os.path.join(SITE, "videos", name + ".mp4")
+    if data["youtube_id"]:  # YouTube-ээс тоглуулна, сайтад MP4 хадгалах шаардлагагүй
+        if os.path.exists(site_vid):
+            os.remove(site_vid)
+    elif os.path.exists(vid):
         os.makedirs(os.path.join(SITE, "videos"), exist_ok=True)
-        shutil.copy2(vid, os.path.join(SITE, "videos", name + ".mp4"))
+        shutil.copy2(vid, site_vid)
         data["video"] = f"videos/{name}.mp4"
     thumb = os.path.join(ROOT, "youtube", name + "_thumbnail.png")
     if os.path.exists(thumb):

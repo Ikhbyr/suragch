@@ -9,8 +9,8 @@ window.LESSONS = [
   "title": "Уншиж сурцгаая!",
   "letters": "аэийым",
   "new": "м",
-  "youtube_id": "",
-  "video": "videos/hicheel_06.mp4",
+  "youtube_id": "tiLkX5DsTTU",
+  "video": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -295,8 +295,8 @@ window.LESSONS = [
   "title": "Уншиж сурцгаая!",
   "letters": "аэийымс",
   "new": "с",
-  "youtube_id": "",
-  "video": "videos/hicheel_07.mp4",
+  "youtube_id": "zwuRPKm2Flg",
+  "video": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -674,8 +674,8 @@ window.LESSONS = [
   "title": "Уншиж сурцгаая!",
   "letters": "аэийымср",
   "new": "р",
-  "youtube_id": "",
-  "video": "videos/hicheel_08.mp4",
+  "youtube_id": "46oMJQSWnYE",
+  "video": "",
   "letter_cards": [
    {
     "ch": "а",

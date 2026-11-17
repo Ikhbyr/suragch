@@ -968,6 +968,13 @@ def make_thumbnail(cfg, bg, path):
     fr.save(path)
 
 
+DESC_LINKS = [
+    "Бусад хичээл: https://suragch.cloud/",
+    "Facebook: https://www.facebook.com/profile.php?id=61596411881841",
+    "Эцэг эх, том хүмүүс дэмжих бол: https://suragch.cloud/#/support",
+]
+
+
 def write_youtube(cfg, chapters, name, root, bg):
     out = os.path.join(root, "youtube")
     os.makedirs(out, exist_ok=True)
@@ -990,7 +997,7 @@ def write_youtube(cfg, chapters, name, root, bg):
         "",
         f"Унших үгс: {words}",
         "",
-        "Бусад хичээл: https://suragch.cloud/",
+        *DESC_LINKS,
         "",
         f"#{BRAND.lower()} #уншлага #{grade}ранги #монголхэл #цагаантолгой",
     ])

@@ -86,6 +86,7 @@ python publish.py --pending                 # YouTube-д ороогүй бүх �
 ```
 python publish.py --facebook   # YouTube-д орсон ч Facebook-д ороогүй хичээлүүдийг нийтэлнэ
 python fb.py queue             # нийтэлсэн, хүлээгдэж буй постууд
+python fb.py pin               # бүх хичээлийн линктэй pin постыг шинэчилнэ (нийтлэх бүрд автоматаар)
 python fb.py check             # токен, хуудас
 ```
 

@@ -285,7 +285,7 @@ def publish_one(path, yt=None):
 def finish_site(cfg, what):
     run(sys.executable, "build_site.py")
     if "--no-push" not in sys.argv:
-        run("git", "add", "lessons", "site", "youtube")
+        run("git", "add", "lessons", "site", "youtube", "facebook_pin.json")
         run("git", "commit", "-q", "-m", f"{cfg.get('lesson_number', '')}-р хичээл {what}")
         run("git", "push", "-q")
         print("Сайт хэдэн минутын дараа шинэчлэгдэнэ: https://suragch.cloud/")
@@ -306,10 +306,15 @@ def facebook_post(path):
         print("  Facebook руу оруулж байна...", flush=True)
         _, when = fb.post_lesson(path, mp4, thumb)
         print("  Facebook: нийтлэгдлээ" if not fb.SCHEDULE else f"  Facebook: {when.strftime('%m-%d %H:%M')}-д нийтлэгдэнэ")
-        return True
     except fb.FBError as e:
         print(f"  Анхаар: Facebook-д оруулж чадсангүй: {e}")
         return False
+    try:
+        fb.update_pin()   # pin пост дахь хичээлийн жагсаалт
+        print("  Facebook: pin постын жагсаалт шинэчлэгдлээ")
+    except fb.FBError as e:
+        print(f"  Анхаар: pin постыг шинэчилж чадсангүй: {e}")
+    return True
 
 
 def facebook_backlog():
@@ -334,7 +339,7 @@ def main():
                 break
             done += 1
         if done and "--no-push" not in sys.argv:
-            run("git", "add", "lessons")
+            run("git", "add", "lessons", "facebook_pin.json")
             run("git", "commit", "-q", "-m", f"Facebook: {done} хичээлийн пост нийтлэв")
             run("git", "push", "-q")
         return

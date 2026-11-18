@@ -5,6 +5,7 @@
     python fb.py setup     # .fb_setup.json-оос хугацаагүй Page token гаргаж .fb_token-д хадгална
     python fb.py check     # токен ажиллаж байгаа эсэх, хуудасны нэр
     python fb.py queue     # хуваарьт орсон постууд
+    python fb.py pin       # бүх хичээлийн линктэй pin постыг үүсгэнэ/шинэчилнэ
 
 Бичлэг хуудсанд шууд нийтлэгдэнэ. SCHEDULE = True болговол өдөрт 1 пост, орой 20:00 (Улаанбаатар) хуваарьтай болно.
 Нийтэлсэн хичээлийн JSON-д "facebook_id" бичигдэх тул давхар нийтлэхгүй.
@@ -27,6 +28,7 @@ TZ = dt.timezone(dt.timedelta(hours=8))   # Улаанбаатар
 POST_HOUR = 20
 SCHEDULE = False   # True: хуваарьтай (өдөрт 1, 20:00), False: шууд нийтэлнэ
 SITE = "https://suragch.cloud/"
+PIN_FILE = os.path.join(ROOT, "facebook_pin.json")   # pin постын id (нууц биш, git-д орно)
 
 
 class FBError(Exception):
@@ -220,10 +222,85 @@ def set_fields(path, **kv):
     open(path, "w", encoding="utf-8").write(s)
 
 
+# ------------------------------------------------ pin пост: бүх хичээлийн жагсаалт
+def lesson_rows():
+    """[(хичээл, гарчиг, линк)] анги, хичээл, дугаарын дарааллаар. FB пост байвал түүнийг, үгүй бол сайтыг."""
+    import glob
+    import make_lesson as M
+    rows = []
+    for p in glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True):
+        c = M.load_cfg(p)
+        if c.get("type") == "math":
+            label = c["topic"]
+        else:
+            nl = c.get("new_letters", "")
+            label = "Й (хагас и) үсэг" if nl == "й" else f"{nl.upper()} үсэг"
+        lid = M.lesson_id(p)
+        link = (f"https://www.facebook.com/reel/{c['facebook_id']}" if c.get("facebook_id")
+                else f"{SITE}#/{lid}")
+        rows.append(((c.get("grade", 1), c.get("subject") != "mongol", c.get("lesson_number") or 0),
+                     c.get("grade", 1), c.get("subject", ""), c.get("lesson_number"), label, link))
+    return [r[1:] for r in sorted(rows)]
+
+
+def pin_text():
+    icons = {"mongol": "📖", "math": "🔢"}
+    lines = ["📌 БҮХ ХИЧЭЭЛ ЭНД БАЙНА", "",
+             "1-р ангийн үнэгүй видео хичээлүүд. Хичээлийнхээ линк дээр дараад үзээрэй. "
+             "Шинэ хичээл гарах бүрд энэ жагсаалт шинэчлэгдэнэ.", ""]
+    cur = None
+    for grade, subj, num, label, link in lesson_rows():
+        if (grade, subj) != cur:
+            if cur:
+                lines.append("")
+            cur = (grade, subj)
+            lines.append(f"{icons.get(subj, '📒')} {grade}-р анги, {SUBJ.get(subj, (subj,))[0]}")
+        lines.append(f"{num}. {label}: {link}")
+    lines += ["", f"🎮 Дасгал, тоглоом: {SITE}",
+              "▶ YouTube: https://www.youtube.com/channel/UCbmSrQ0QNw1n1NB7T5AAxZg",
+              "", "#сурагч #1ранги #хүүхдэд"]
+    return "\n".join(lines)
+
+
+def update_pin():
+    """Pin постыг шинэчилнэ (байхгүй бол үүсгээд pin хийнэ). Постын id-г буцаана."""
+    t = load_token()
+    if not t:
+        raise FBError("Facebook токен алга (.fb_token)")
+    msg = pin_text()
+    pid = None
+    if os.path.exists(PIN_FILE):
+        with open(PIN_FILE, encoding="utf-8") as f:
+            pid = json.load(f).get("post_id")
+    if pid:
+        try:
+            _check(requests.post(f"{API}/{pid}", data={"message": msg, "access_token": t["token"]}, timeout=60))
+            return pid
+        except FBError as e:   # пост устгагдсан бол шинээр үүсгэнэ
+            print(f"  Хуучин pin постыг засаж чадсангүй ({e}), шинээр үүсгэнэ.")
+    try:
+        pid = _check(requests.post(f"{API}/{t['page_id']}/feed",
+                                   data={"message": msg, "access_token": t["token"]}, timeout=60))["id"]
+    except requests.RequestException as e:
+        raise FBError(f"Сүлжээний алдаа: {type(e).__name__}") from None
+    with open(PIN_FILE, "w", encoding="utf-8") as f:
+        json.dump({"post_id": pid}, f)
+    try:   # API pin хийх эрх ихэвчлэн өгдөггүй: тэгвэл хуудсан дээрээ гараар нэг удаа pin хийнэ
+        _check(requests.post(f"{API}/{pid}", data={"is_pinned": "true", "access_token": t["token"]}, timeout=60))
+    except (FBError, requests.RequestException):
+        print("  Постыг хуудсан дээрээ гараар pin хийнэ үү (⋯ > Pin post). Цаашид энэ пост өөрөө шинэчлэгдэнэ.")
+    return pid
+
+
+def pin():
+    pid = update_pin()
+    print(f"Pin пост бэлэн: https://www.facebook.com/{pid}")
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     try:
-        {"setup": setup, "check": check, "queue": queue}.get(cmd, lambda: sys.exit(__doc__))()
+        {"setup": setup, "check": check, "queue": queue, "pin": pin}.get(cmd, lambda: sys.exit(__doc__))()
     except FBError as e:
         sys.exit(f"Facebook алдаа: {e}")

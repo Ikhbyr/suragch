@@ -1084,6 +1084,9 @@ def overlay_tokens(cfg):
     return list(cfg["letters"]), cfg.get("new_letters", "")
 
 
+# Тайлбарын эхний мөр: «Хүүхдэд зориулсан» бичлэгт линк дарагддаггүй тул хялбар бичигдэх хаягийг дээр нь харуулна
+DESC_TOP = "📒 Дасгал, тоглоом, бүх хичээл: suragch.cloud"
+
 DESC_LINKS = [
     "Бусад хичээл: https://suragch.cloud/",
     "Facebook: https://www.facebook.com/profile.php?id=61596411881841",
@@ -1095,6 +1098,8 @@ def math_youtube(cfg, chap):
     num, grade = cfg.get("lesson_number", ""), cfg.get("grade", 1)
     title = f"{cfg.get('title', 'Тоолж сурцгаая!')} {num}-р хичээл: {cfg['topic']} | {grade}-р анги математик | {BRAND}"
     desc = "\n".join([
+        DESC_TOP,
+        "",
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан математикийн хичээл.",
         f"Сэдэв: {cfg['topic']}.",
         cfg.get("summary", ""),
@@ -1155,6 +1160,8 @@ def reading_youtube(cfg, chap):
     if len(title) > 100:  # YouTube-ийн хязгаар: үсэг олон болоход зөвхөн шинэ үсгээ бичнэ
         title = f"Уншиж сурцгаая! {num}-р хичээл: шинэ үсэг {new.upper()} | {grade}-р анги | {BRAND}"
     desc = "\n".join([
+        DESC_TOP,
+        "",
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
         (f"{new.upper()} үсэгтэй танилцаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") and not reviews(cfg) else
          f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") else

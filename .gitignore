@@ -9,3 +9,7 @@ client_secret*.json
 .youtube_token.json
 .fb_token
 .fb_setup.json
+/promo/*.mp4
+/promo/*snap*.png
+/promo/frames.png
+/promo/shots_sheet.png

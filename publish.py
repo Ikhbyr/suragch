@@ -264,6 +264,8 @@ def publish_one(path, yt=None):
     except HttpError as e:
         if "uploadLimitExceeded" in str(e) or "quotaExceeded" in str(e):
             print("  YouTube-ийн өдрийн хязгаарт хүрлээ. Маргааш дахин ажиллуулна уу: python publish.py --pending")
+            if facebook_post(path):   # Facebook, сайтад YouTube-гүйгээр (MP4) гаргана
+                finish_site(cfg, "Facebook, сайтад нийтлэв (YouTube дараа)")
             return False
         raise
     vid = resp["id"]
@@ -273,20 +275,24 @@ def publish_one(path, yt=None):
     sync_playlists(yt)
     facebook_post(path)
 
-    run(sys.executable, "build_site.py")
-    if "--no-push" not in sys.argv:
-        run("git", "add", "lessons", "site", "youtube")
-        run("git", "commit", "-q", "-m", f"{cfg.get('lesson_number', '')}-р хичээл YouTube-д нийтлэв ({vid})")
-        run("git", "push", "-q")
-        print("Сайт хэдэн минутын дараа шинэчлэгдэнэ: https://suragch.cloud/")
+    finish_site(cfg, f"YouTube-д нийтлэв ({vid})")
     if resp["status"].get("privacyStatus") != privacy:
         print(f"  Анхаар: бичлэг {resp['status'].get('privacyStatus')} болсон. Studio дээр шалгана уу: "
               f"https://studio.youtube.com/video/{vid}/edit")
     return True
 
 
+def finish_site(cfg, what):
+    run(sys.executable, "build_site.py")
+    if "--no-push" not in sys.argv:
+        run("git", "add", "lessons", "site", "youtube")
+        run("git", "commit", "-q", "-m", f"{cfg.get('lesson_number', '')}-р хичээл {what}")
+        run("git", "push", "-q")
+        print("Сайт хэдэн минутын дараа шинэчлэгдэнэ: https://suragch.cloud/")
+
+
 def facebook_post(path):
-    """Facebook хуудсанд хуваарьтай пост. Токен байхгүй эсвэл алдаа гарвал анхааруулаад үргэлжилнэ."""
+    """Facebook хуудсанд пост (fb.SCHEDULE-ээс хамаарч шууд эсвэл хуваарьтай). Токен байхгүй эсвэл алдаа гарвал анхааруулаад үргэлжилнэ."""
     import fb
     if not fb.load_token():
         return False
@@ -299,7 +305,7 @@ def facebook_post(path):
     try:
         print("  Facebook руу оруулж байна...", flush=True)
         _, when = fb.post_lesson(path, mp4, thumb)
-        print(f"  Facebook: {when.strftime('%m-%d %H:%M')}-д нийтлэгдэнэ")
+        print("  Facebook: нийтлэгдлээ" if not fb.SCHEDULE else f"  Facebook: {when.strftime('%m-%d %H:%M')}-д нийтлэгдэнэ")
         return True
     except fb.FBError as e:
         print(f"  Анхаар: Facebook-д оруулж чадсангүй: {e}")
@@ -320,7 +326,7 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if "--facebook" in sys.argv:
         todo = facebook_backlog()
-        print(f"Facebook-д ороогүй {len(todo)} хичээл байна (өдөрт 1, орой 20:00).")
+        print(f"Facebook-д ороогүй {len(todo)} хичээл байна.")
         done = 0
         for p in todo:
             print(f"\n== {os.path.relpath(p, ROOT)}")
@@ -329,7 +335,7 @@ def main():
             done += 1
         if done and "--no-push" not in sys.argv:
             run("git", "add", "lessons")
-            run("git", "commit", "-q", "-m", f"Facebook: {done} хичээлийн пост хуваарьт орлоо")
+            run("git", "commit", "-q", "-m", f"Facebook: {done} хичээлийн пост нийтлэв")
             run("git", "push", "-q")
         return
     if "--sync" in sys.argv:

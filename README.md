@@ -80,12 +80,12 @@ python publish.py --pending                 # YouTube-д ороогүй бүх �
 
 ## Facebook хуудас
 
-`publish.py` нь YouTube-д оруулсны дараа бичлэгийг Facebook хуудсанд **хуваарьтай** нийтэлнэ:
-өдөрт 1 пост, орой 20:00 цагт. Хичээлийн JSON-д `facebook_id`, `facebook_time` бичигдэнэ.
+`publish.py` нь YouTube-д оруулсны дараа бичлэгийг Facebook хуудсанд **шууд** нийтэлнэ
+(хуваарьтай болгох бол `fb.py` дахь `SCHEDULE = True`: өдөрт 1 пост, орой 20:00). Хичээлийн JSON-д `facebook_id`, `facebook_time` бичигдэнэ.
 
 ```
-python publish.py --facebook   # YouTube-д орсон ч Facebook-д ороогүй хичээлүүдийг хуваарьт оруулна
-python fb.py queue             # хуваарь
+python publish.py --facebook   # YouTube-д орсон ч Facebook-д ороогүй хичээлүүдийг нийтэлнэ
+python fb.py queue             # нийтэлсэн, хүлээгдэж буй постууд
 python fb.py check             # токен, хуудас
 ```
 

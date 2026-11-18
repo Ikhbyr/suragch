@@ -6,7 +6,7 @@
     python fb.py check     # токен ажиллаж байгаа эсэх, хуудасны нэр
     python fb.py queue     # хуваарьт орсон постууд
 
-Бичлэг бүр шууд гарахгүй: өдөрт 1 пост, орой 20:00 цагт (Улаанбаатар) хуваарьтай нийтлэгдэнэ.
+Бичлэг хуудсанд шууд нийтлэгдэнэ. SCHEDULE = True болговол өдөрт 1 пост, орой 20:00 (Улаанбаатар) хуваарьтай болно.
 Нийтэлсэн хичээлийн JSON-д "facebook_id" бичигдэх тул давхар нийтлэхгүй.
 Токенууд (.fb_token, .fb_setup.json) git-д орохгүй, дэлгэцэнд хэвлэгдэхгүй.
 """
@@ -25,6 +25,7 @@ API = "https://graph.facebook.com/v23.0"
 VIDEO_API = "https://graph-video.facebook.com/v23.0"
 TZ = dt.timezone(dt.timedelta(hours=8))   # Улаанбаатар
 POST_HOUR = 20
+SCHEDULE = False   # True: хуваарьтай (өдөрт 1, 20:00), False: шууд нийтэлнэ
 SITE = "https://suragch.cloud/"
 
 
@@ -174,7 +175,7 @@ def post_text(cfg, lesson_id, youtube_id):
 
 
 def post_lesson(path, mp4, thumb_png, when=None):
-    """Бичлэгийг хуудсанд хуваарьтай нийтэлнэ. (video_id, unix цаг) буцаана."""
+    """Бичлэгийг хуудсанд нийтэлнэ (шууд эсвэл хуваарьтай). (video_id, цаг) буцаана."""
     import make_lesson as M
     t = load_token()
     if not t:
@@ -182,12 +183,14 @@ def post_lesson(path, mp4, thumb_png, when=None):
     cfg = M.load_cfg(path)
     lid = M.lesson_id(path)
     desc, title = post_text(cfg, lid, cfg.get("youtube_id", ""))
-    when = when or next_slot()
+    immediate = when is None and not SCHEDULE
+    when = dt.datetime.now(TZ) if immediate else (when or next_slot())
     jpg = os.path.join(ROOT, ".tts_cache", f"fbthumb_{lid}.jpg")
     from PIL import Image
     Image.open(thumb_png).convert("RGB").save(jpg, quality=90)
-    data = {"title": title, "description": desc, "access_token": t["token"],
-            "published": "false", "scheduled_publish_time": str(int(when.timestamp()))}
+    data = {"title": title, "description": desc, "access_token": t["token"]}
+    if not immediate:
+        data.update(published="false", scheduled_publish_time=str(int(when.timestamp())))
     try:
         with open(mp4, "rb") as v, open(jpg, "rb") as th:
             r = requests.post(f"{VIDEO_API}/{t['page_id']}/videos", data=data,

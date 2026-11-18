@@ -23,6 +23,7 @@
 ## Дуу хоолой, арын хөгжим
 
 - Нийтлэг тохиргоо `settings.json` файлд байна: `tts_provider` (`chimege` эсвэл `edge`), Chimege-ийн хоолой (`voice`), өнгө (`pitch`), хурд, арын хөгжмийн чанга (`music_volume`, 0 бол хөгжимгүй).
+- `review_letters`: `false` бол видеоны эхэнд өмнө үзсэн бүх үсгийг давтахгүй, зөвхөн шинэ үсгээ танилцуулна (гарчиг ч шинэ үсгээр). Нийтлэгдсэн хуучин хичээлүүдэд `true`, `music_volume: 0.16` бэхлэгдсэн.
 - Chimege токенийг `.chimege_token` файлд хадгална (git-д орохгүй). Терминалд:
   `Set-Content -Path .chimege_token -Value (Read-Host "Chimege token") -Encoding ascii`
 - Бүх хоолойн жишээ сонсох: `python make_lesson.py --voices` → `samples/` хавтас.

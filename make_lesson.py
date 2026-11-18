@@ -1057,8 +1057,8 @@ def make_thumbnail(cfg, bg, path):
                      stroke=10, stroke_fill=C_WHITE)
     letters, new = overlay_tokens(cfg)
     if cfg.get("type") != "math" and not reviews(cfg) and new:
-        for i, (x, y) in enumerate(grid(len(new), 385, 300, 30)):
-            draw_tile(d, new[i].upper() + new[i], x, y, 300, 250, text_size=170, fill=(255, 238, 160))
+        for i, (x, y) in enumerate(grid(len(new), 372, 300, 30)):
+            draw_tile(d, new[i].upper() + new[i], x, y, 300, 230, text_size=165, fill=(255, 238, 160))
     else:
         cell = min(150, (W - 120) / len(letters) - 16)
         for i, (x, y) in enumerate(grid(len(letters), 385, cell, 16, maxrow=12)):

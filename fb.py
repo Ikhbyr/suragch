@@ -157,9 +157,13 @@ def post_text(cfg, lesson_id, youtube_id):
         head = f"{cfg.get('title', '')} {num}-р хичээл: {cfg['topic']}"
         what = cfg.get("summary", "")
     else:
-        letters = ", ".join(cfg["letters"])
-        head = f"{cfg.get('title', '')} {num}-р хичээл: {letters} үсэг"
-        what = f"Шинэ үсэг: {cfg.get('new_letters', '').upper()}. Үсгээ давтаж, үе холбож, үг, өгүүлбэр уншина."
+        new = cfg.get("new_letters", "")
+        if cfg.get("review_letters", True):
+            head = f"{cfg.get('title', '')} {num}-р хичээл: {', '.join(cfg['letters'])} үсэг"
+            what = f"Шинэ үсэг: {new.upper()}. Үсгээ давтаж, үе холбож, үг, өгүүлбэр уншина."
+        else:
+            head = f"{cfg.get('title', '')} {num}-р хичээл: {new.upper()} үсэг"
+            what = f"{new.upper()} үсэгтэй танилцаж, үе холбож, үг, өгүүлбэр уншина."
     lines = [
         f"📒 {grade}-р анги, {name}",
         head,

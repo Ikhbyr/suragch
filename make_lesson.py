@@ -41,10 +41,17 @@ C_WHITE = (255, 255, 255)
 C_SHADOW = (206, 214, 228)
 C_GRAY = (175, 175, 185)
 C_DIM = (196, 198, 210)      # үзээгүй үсэг (сонсох үгэнд)
+NEW_LETTER_SECTION = {"title": "Шинэ үсэг", "emoji": "⭐",
+                      "say": "Өнөөдрийн шинэ үсэгтэй танилцъя. Би хэлнэ, чи давтаж хэлээрэй."}
 SECTION_COLORS = {
     "letters": (255, 138, 60), "syllables": (67, 170, 80), "words": (33, 140, 230),
     "sentences": (150, 60, 180), "quiz": (235, 70, 70), "listen": (230, 110, 160),
 }
+
+
+def reviews(cfg):
+    """Өмнө үзсэн бүх үсгийг видеоны эхэнд давтах эсэх (хуучин хичээлүүд: тийм, шинэ: settings.json-оор үгүй)."""
+    return cfg.get("review_letters", True)
 
 
 def letter_color(ch):
@@ -425,14 +432,16 @@ class Lesson:
     def intro(self):
         tl, cfg = self.tl, self.cfg
         narr = self.say(cfg["intro"])
-        n = len(self.letters)
+        shown = self.letters if reviews(cfg) else (self.new or self.letters)
+        n = len(shown)
+        big = n <= 3   # цөөн үсэг: том харуулна
         t_l, step = 1.3, 0.32
         tl.sound(0.1, SFX_WHOOSH)
         tl.sound(0.7, narr)
         for i in range(n):
             tl.sound(t_l + i * step, SFX_POP)
         length = max(0.7 + dur(narr), t_l + n * step) + 1.2
-        pos = grid(n, 500, 112, 18)
+        pos = grid(n, 500, 200 if big else 112, 30 if big else 18)
         title = cfg.get("title", "Уншиж сурцгаая!")
         num = cfg.get("lesson_number")
 
@@ -443,16 +452,21 @@ class Lesson:
             paste_emoji(fr, "✏️", W / 2 + 520, 205, 110 * pop(t, 0.5))
             if num:
                 draw_text_center(d, f"{num}-р хичээл", W / 2, 320, 44 * pop(t, 0.6), C_INK)
-            for i, ch in enumerate(self.letters):
+            for i, ch in enumerate(shown):
                 sc = pop(t, t_l + i * step)
                 x, y = pos[i]
-                draw_tile(d, ch, x, y, 104, 104, scale=sc, text_size=70,
-                          fill=(255, 244, 196) if ch in self.new else C_WHITE)
+                if big:
+                    draw_tile(d, ch.upper() + ch, x, y, 260, 210, scale=sc, text_size=130, fill=(255, 244, 196))
+                else:
+                    draw_tile(d, ch, x, y, 104, 104, scale=sc, text_size=70,
+                              fill=(255, 244, 196) if ch in self.new else C_WHITE)
         tl.add(length, draw, overlay=False)
 
     def section(self, key):
         tl = self.tl
         sec = self.cfg["sections"][key]
+        if key == "letters" and not reviews(self.cfg):
+            sec = {**NEW_LETTER_SECTION, **self.cfg["sections"].get("new_letter", {})}
         self.chapters.append((tl.t, sec["title"]))
         tl.section = (sec["title"], SECTION_COLORS.get(key, (100, 100, 100)))
         narr = self.say(sec["say"])
@@ -553,13 +567,15 @@ class Lesson:
                 draw_tile(d, syl, W / 2, cy, 400, 220, scale=s, text_size=150,
                           fill=(255, 246, 200) if speaking else C_WHITE, arcs=[(0, len(syl))])
             # бүлгийн мөр
-            for j, (x, y) in enumerate(grid(len(group), 590, 140, 22)):
+            gc = min(140, (W - 300) / len(group) - 22)   # олон эгшигтэй бол багтаана
+            gs = 62 * gc / 140
+            for j, (x, y) in enumerate(grid(len(group), 590, gc, 22)):
                 if j < idx:
-                    draw_tile(d, group[j], x, y, 140, 92, text_size=62)
+                    draw_tile(d, group[j], x, y, gc, 92, text_size=gs)
                 elif j == idx:
-                    draw_tile(d, group[j], x, y, 140, 92, text_size=62, fill=C_HL, border=(240, 190, 60))
+                    draw_tile(d, group[j], x, y, gc, 92, text_size=gs, fill=C_HL, border=(240, 190, 60))
                 else:
-                    draw_tile(d, group[j], x, y, 140, 92, text_size=62, fill=(244, 244, 246),
+                    draw_tile(d, group[j], x, y, gc, 92, text_size=gs, fill=(244, 244, 246),
                               border=(225, 225, 230), color=C_GRAY)
             draw_your_turn(fr, t, t_end + 0.15, length)
         tl.add(length, draw)
@@ -799,7 +815,7 @@ class Lesson:
         cfg = self.cfg
         self.intro()
         self.section("letters")
-        for ch in self.letters:
+        for ch in (self.letters if reviews(cfg) else [c for c in self.letters if c in self.new]):
             self.letter(ch)
         if cfg.get("listen_words"):
             self.section("listen")
@@ -831,9 +847,18 @@ class Lesson:
 def draw_overlay(fr, d, section, letters, new):
     """Баруун дээд буланд үзсэн үсэг (эсвэл тоо, тэмдэг). letters: мөр эсвэл жагсаалт."""
     toks = list(letters)
-    size, gap = 34, 8
-    f = font(F_TEXT, size)
-    cells = [max(44, f.getlength(tk) + 16) for tk in toks]
+    room = W - 22 - (font(F_HEAD, 30).getlength(section[0]) + 110 if section else 60)
+    for size in (34, 30, 26, 22):   # үсэг олон болоход жижигрүүлнэ
+        gap = max(4, size // 4)
+        f = font(F_TEXT, size)
+        cells = [max(size * 1.3, f.getlength(tk) + size * 0.47) for tk in toks]
+        if sum(cells) + (len(toks) - 1) * gap + 28 <= room:
+            break
+    else:   # багтахгүй бол зөвхөн шинэ үсгээ
+        toks = [tk for tk in toks if tk in new] or toks[-1:]
+        size, gap = 34, 8
+        f = font(F_TEXT, size)
+        cells = [max(44, f.getlength(tk) + 16) for tk in toks]
     x1 = W - 22
     x0 = x1 - (sum(cells) + (len(toks) - 1) * gap + 28)
     y0, y1 = 18, 76
@@ -1031,11 +1056,15 @@ def make_thumbnail(cfg, bg, path):
     draw_text_center(d, cfg.get("title", "Уншиж сурцгаая!"), W / 2, 205, 96, (255, 112, 40),
                      stroke=10, stroke_fill=C_WHITE)
     letters, new = overlay_tokens(cfg)
-    cell = min(150, (W - 120) / len(letters) - 16)
-    for i, (x, y) in enumerate(grid(len(letters), 385, cell, 16, maxrow=12)):
-        ch = letters[i]
-        draw_tile(d, ch, x, y, cell, cell * 1.1, text_size=cell * (0.6 if len(ch) > 1 else 0.75),
-                  fill=(255, 238, 160) if ch in new else C_WHITE)
+    if cfg.get("type") != "math" and not reviews(cfg) and new:
+        for i, (x, y) in enumerate(grid(len(new), 385, 300, 30)):
+            draw_tile(d, new[i].upper() + new[i], x, y, 300, 250, text_size=170, fill=(255, 238, 160))
+    else:
+        cell = min(150, (W - 120) / len(letters) - 16)
+        for i, (x, y) in enumerate(grid(len(letters), 385, cell, 16, maxrow=12)):
+            ch = letters[i]
+            draw_tile(d, ch, x, y, cell, cell * 1.1, text_size=cell * (0.6 if len(ch) > 1 else 0.75),
+                      fill=(255, 238, 160) if ch in new else C_WHITE)
     num = cfg.get("lesson_number")
     if num:
         d.rounded_rectangle([60, 520, 470, 640], 60, fill=(33, 140, 230))
@@ -1121,11 +1150,14 @@ def reading_youtube(cfg, chap):
     heard = ", ".join(w["w"] for w in cfg.get("listen_words", []))
     grade = cfg.get("grade", 1)
     title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | {grade}-р анги | {BRAND}"
+    if not reviews(cfg):
+        title = f"Уншиж сурцгаая! {num}-р хичээл: {new.upper()} үсэг | {grade}-р анги | {BRAND}"
     if len(title) > 100:  # YouTube-ийн хязгаар: үсэг олон болоход зөвхөн шинэ үсгээ бичнэ
         title = f"Уншиж сурцгаая! {num}-р хичээл: шинэ үсэг {new.upper()} | {grade}-р анги | {BRAND}"
     desc = "\n".join([
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
-        (f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") else
+        (f"{new.upper()} үсэгтэй танилцаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") and not reviews(cfg) else
+         f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") else
          f"{new.upper()} үсэгтэй танилцаж, сонссон үгэн дотроос нь олж сурна."),
         f"Шинэ үсэг: {new}",
         "",
@@ -1141,7 +1173,8 @@ def reading_youtube(cfg, chap):
         f"#{BRAND.lower()} #уншлага #{grade}ранги #монголхэл #цагаантолгой",
     ])
     tags = (f"{BRAND.lower()}, уншлага, уншиж сурах, цагаан толгой, монгол хэл, 1-р анги, нэгдүгээр анги, "
-            "бага анги, үсэг, үе холбох, хүүхдэд, хичээл, " + ", ".join(cfg["letters"]) + " үсэг")
+            "бага анги, үсэг, үе холбох, хүүхдэд, хичээл, "
+            + ", ".join(cfg["letters"] if reviews(cfg) else cfg.get("new_letters", "")) + " үсэг")
     return title, desc, tags
     print("Thumbnail:", thumb)
 

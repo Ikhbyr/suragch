@@ -13,3 +13,6 @@ client_secret*.json
 /promo/*snap*.png
 /promo/frames.png
 /promo/shots_sheet.png
+/Reading/
+/chant/*.mp4
+/chant/*snap*.png

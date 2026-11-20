@@ -458,3 +458,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .slot { width: 84px; height: 96px; font-size: 56px; }
   .key { width: 60px; height: 66px; font-size: 36px; }
 }
+
+/* дэс дугаар: эгнээ, тэмдэглэсэн зүйл */
+.objs.row { flex-wrap: nowrap; max-width: none; }
+.ob.ring { background: #fff1b8; box-shadow: 0 0 0 4px #eb4646; }
+.ord-grid .num-objs .objs.row { font-size: 26px; gap: 3px; }
+.prob-row { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+.prob-row .objs { font-size: 24px; gap: 2px 3px; }
+.prob:has(.prob-row) { flex-wrap: wrap; }
+.lesson-letters .mini.wide { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.dir { font-size: 20px; opacity: .7; }
+.tok.wide { min-width: 2.6em; }
+.op.word { font-size: .6em; font-weight: 800; color: #56608a; }
+.story-title { margin-top: 26px; }
+.mgame .pic .objs.row { max-width: none; }
+@media (max-width: 520px) {
+  .prob-row .objs, .ord-grid .num-objs .objs.row { font-size: 19px; }
+  .mgame .pic .objs.row { font-size: 28px; }
+}

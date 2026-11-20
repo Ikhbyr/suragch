@@ -214,6 +214,9 @@
 
   // ------------------------------------------------ хичээлийн карт
   function cardGlyph(l) {
+    if (l.glyph) {
+      return `<span class="glyph${l.glyph.length > 3 ? " small" : ""}">${[...l.glyph].map((ch) => (ch === " " ? " " : colorize(ch))).join("")}</span>`;
+    }
     if (l.type === "math") {
       const nw = l.new_chips || [];
       const c = nw.length && nw.every((x) => /^[0-9]+$/.test(x)) ? nw : l.chips;   // шинэ тоо, эсвэл илэрхийлэл
@@ -225,7 +228,7 @@
   }
   const LETTER_NAMES = { "й": "Хагас и" };
   const cardCaption = (l) => (l.type === "math" ? l.topic
-    : l.new ? `${LETTER_NAMES[l.new] || l.new.toUpperCase()} үсэг` : l.title || "");
+    : l.new ? `${LETTER_NAMES[l.new] || l.new.toUpperCase()} үсэг` : l.topic || l.title || "");
 
   function lessonCard(l, opts = {}) {
     const cls2 = ["tile", "lcard", opts.seen ? "seen" : "", opts.next ? "next" : ""].join(" ").trim();
@@ -309,12 +312,12 @@
 
   // ------------------------------------------------ хичээл
   function lessonView(l, tab) {
-    const what = l.type === "math" ? l.topic : [...l.letters].join(" ");
+    const what = l.topic || [...l.letters].join(" ");
     document.title = `${subjectName(l.subject)}, ${l.number}-р хичээл: ${what} | ${BRAND}`;
     app.innerHTML = `
       <div class="lesson-head">
         <a class="btn ghost back" href="#/g/${l.grade}/${l.subject}">← ${l.grade}-р анги</a>
-        <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}${l.type === "math" ? `: ${esc(l.topic)}` : ""}</small></h1>
+        <h1>${l.number}-р хичээл <small>${l.grade}-р анги, ${subjectName(l.subject)}${l.topic ? `: ${esc(l.topic)}` : ""}</small></h1>
         ${chipRow(l, l.type === "math" ? l.topic : "Үсгүүд")}
       </div>
       <div class="tabs" role="tablist">
@@ -500,9 +503,12 @@
   }
 
   function sentPanel(p, l) {
-    p.innerHTML = `<h2>Өгүүлбэр уншъя</h2>
-      <p class="hint">▶ дээр дарвал үг үгээр нь, дараа нь бүтэн өгүүлбэрийг уншина.</p>
+    const plain = l.sentences.some((s) => !s.story);
+    p.innerHTML = `${plain ? `<h2>Өгүүлбэр уншъя</h2>
+      <p class="hint">▶ дээр дарвал үг үгээр нь, дараа нь бүтэн өгүүлбэрийг уншина.</p>` : ""}
       ${l.sentences.map((s, i) => `
+        ${s.story && !(l.sentences[i - 1] || {}).story ? `<h2 class="story-title">${l.story_emoji ? `<span aria-hidden="true">${l.story_emoji}</span> ` : ""}Өгүүллэг: ${colorize(l.story_title || "")}</h2>
+          <p class="hint">Өгүүлбэр бүрийг ▶ дарж сонсоод, дагаж уншаарай.</p>` : ""}
         <div class="sentence" data-i="${i}">
           <button class="tile play" aria-label="Өгүүлбэрийг унших">▶</button>
           ${s.words.map((w) => `<button class="sw" data-a="${w.a}">${colorize(w.t)}</button>`).join("")}
@@ -592,7 +598,36 @@
   const objs = (e, n) => `<span class="objs" aria-hidden="true">${Array.from({ length: n }, (_, i) =>
     `<span class="ob" style="animation-delay:${i * 90}ms">${e}</span>`).join("")}</span>`;
 
+  // эгнээ: ring - тэмдэглэх зүйлийн индекс
+  const rowHtml = (row, ring) => `<span class="objs row" aria-hidden="true">${row.map((e, i) =>
+    `<span class="ob${i === ring ? " ring" : ""}" style="animation-delay:${i * 70}ms">${e}</span>`).join("")}</span>`;
+
+  function ordPanel(p, l) {
+    p.innerHTML = `<h2>Дэс дугаар</h2>
+      <p class="hint">Карт дээр дарж сонсоорой. Зүүн талаас нь тоолно.</p>
+      <div class="num-grid ord-grid">
+        ${l.nums.map((c, i) => `
+          <button class="tile num-card" data-i="${i}" aria-label="${c.word}">
+            <span class="num-big">${colorize(`${c.n}-р`)}</span>
+            <span class="num-word">${esc(c.word)}</span>
+            <span class="num-objs">${rowHtml(c.row, c.n - 1)}</span>
+          </button>`).join("")}
+      </div>`;
+    $$(".num-card", p).forEach((b) => b.addEventListener("click", () => {
+      const c = l.nums[b.dataset.i];
+      clearMarks();
+      const obs = $$(".ob", b);
+      const steps = [{ before: () => b.classList.add("playing") }];
+      for (let k = 0; k < c.n; k++) {
+        steps.push({ before: () => obs[k].classList.add("on"), a: l.ord_audio[k + 1] }, { ms: 120 });
+      }
+      steps.push({ ms: 400, after: () => { b.classList.remove("playing"); obs.forEach((o) => o.classList.remove("on")); } });
+      playSeq(steps);
+    }));
+  }
+
   function numsPanel(p, l) {
+    if (l.nums.length && l.nums[0].ord) return ordPanel(p, l);
     p.innerHTML = `<h2>Тоотой танилцъя</h2>
       <p class="hint">Тоон дээр дарж сонсоод, зүйлсийг хамт тоолоорой.</p>
       <div class="num-grid">
@@ -619,7 +654,9 @@
 
   // "2 + 1 = ?" илэрхийлэл. hidden: асуултын тэмдгээр солих байрлал
   const tokHtml = (t, hidden) => t.map((tk, i) => {
-    if (i === hidden) return `<span class="tok q${/^[0-9]+$/.test(tk) ? "" : " sgn"}">?</span>`;
+    if (i === hidden) return `<span class="tok q${/^[0-9]/.test(tk) ? "" : " sgn"}">?</span>`;
+    if (/^[0-9]+-р$/.test(tk)) return `<span class="tok wide">${colorize(tk)}</span>`;
+    if (/^\p{L}{2,}$/u.test(tk)) return `<span class="op word">${esc(tk)}</span>`;
     return /^[0-9]+$/.test(tk) ? `<span class="tok">${colorize(tk)}</span>` : `<span class="op">${esc(tk)}</span>`;
   }).join("");
 
@@ -630,6 +667,7 @@
         ${l.problems.map((q, i) => `
           <button class="tile prob" data-i="${i}" aria-label="Хариуг харах">
             ${q.emoji ? `<span class="em" aria-hidden="true">${q.emoji}</span>` : ""}
+            ${q.row ? `<span class="prob-row"><span class="dir">${q.right ? "⬅️" : "➡️"}</span>${rowHtml(q.row, q.ring)}</span>` : ""}
             <span class="expr">${tokHtml(q.t, q.h)}</span>
           </button>`).join("")}
       </div>`;
@@ -639,7 +677,7 @@
       if (tk) {
         tk.classList.remove("q");
         tk.classList.add("ok");
-        tk.innerHTML = /^[0-9]+$/.test(q.t[q.h]) ? colorize(q.t[q.h]) : esc(q.t[q.h]);
+        tk.innerHTML = /^[0-9]/.test(q.t[q.h]) ? colorize(q.t[q.h]) : esc(q.t[q.h]);
         row.classList.add("done");
         sfxRight();
       }
@@ -654,7 +692,7 @@
     const max = l.game.max;
     const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
     const TITLE = { count: "Хэд байна?", add: "Нэмж бодоорой", sub: "Хасаж бодоорой", compare: "Тэмдгээ ол",
-                    split: "Хэд дутуу вэ?", mix: "Бодоод ол" };
+                    split: "Хэд дутуу вэ?", mix: "Бодоод ол", ordinal: "Хэд дэх вэ?" };
     let round = 0, score = 0, missed = false;
 
     function numOpts(ans, lo, hi) {
@@ -668,6 +706,17 @@
       let kind = l.game.kind;
       if (kind === "mix") kind = ["add", "sub", "compare"][rnd(0, 2)];
       const e = EMO[rnd(0, EMO.length - 1)];
+      if (kind === "ordinal") {
+        const k = rnd(4, Math.max(4, Math.min(8, max))), i = rnd(0, k - 1);
+        const pool = shuffle(EMO);
+        const row = Array.from({ length: k }, (_, j) => pool[j % pool.length]);
+        const set = new Set([i + 1]);
+        while (set.size < 3) set.add(Math.max(1, Math.min(k, i + 1 + rnd(-2, 2))));
+        for (let v = 1; set.size < 3; v++) set.add(v);
+        const ans = `${i + 1}-р`;
+        return { pic: `<span class="dir">➡️</span>${rowHtml(row, i)}`, q: tokHtml([ans], 0), ans,
+                 opts: shuffle([...set].map((v) => `${v}-р`)), audio: l.ord_q_audio, say: l.ord_audio[i + 1] };
+      }
       if (kind === "count") {
         const n = rnd(1, max);
         return { pic: objs(e, n), q: "", ans: String(n), opts: numOpts(n, 1, max), audio: l.q_audio };
@@ -718,7 +767,7 @@
           if (q) { q.classList.remove("q"); q.classList.add("ok"); q.innerHTML = g.sym ? esc(g.ans) : colorize(g.ans); }
           sfxRight();
           $$(".choice", p).forEach((x) => { x.disabled = true; });
-          setTimeout(() => playSeq([{ a: g.sym ? l.cmp_audio[g.ans] : l.num_audio[Number(g.ans)] }]), 300);
+          setTimeout(() => playSeq([{ a: g.say || (g.sym ? l.cmp_audio[g.ans] : l.num_audio[Number(g.ans)]) }]), 300);
           round++;
           setTimeout(next, 1800);
         } else {

@@ -9,6 +9,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "eB3vv84Dkxc",
   "video": "",
+  "glyph": "",
   "chips": [
    "1",
    "2",
@@ -76,6 +77,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "q0Q1tjM8iQU",
   "video": "",
+  "glyph": "",
   "chips": [
    "1",
    "2",
@@ -138,6 +140,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "0ZoJRnaLWtY",
   "video": "",
+  "glyph": "",
   "chips": [
    "1",
    "2",
@@ -202,6 +205,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "1xse72UakRs",
   "video": "",
+  "glyph": "",
   "chips": [
    "1",
    "2",
@@ -268,6 +272,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "yacwWYeq10M",
   "video": "",
+  "glyph": "",
   "chips": [
    "0",
    "1",
@@ -336,6 +341,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "_tDgeVODgm4",
   "video": "",
+  "glyph": "",
   "chips": [
    "<",
    "=",
@@ -495,6 +501,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "m1qIHpYTYu0",
   "video": "",
+  "glyph": "",
   "chips": [
    "2",
    "3",
@@ -685,6 +692,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "O4NVMXC5G_g",
   "video": "",
+  "glyph": "",
   "chips": [
    "1",
    "+",
@@ -866,6 +874,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "FTOBTXfzhVU",
   "video": "",
+  "glyph": "",
   "chips": [
    "5",
    "+",
@@ -1057,6 +1066,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "_DWHHR_fvvc",
   "video": "",
+  "glyph": "",
   "chips": [
    "5",
    "−",
@@ -1238,6 +1248,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "xic7QQ0WMM4",
   "video": "",
+  "glyph": "",
   "chips": [
    "9",
    "−",
@@ -1429,6 +1440,7 @@ window.LESSONS = [
   "title": "Тоолж сурцгаая!",
   "youtube_id": "rkK70QJH_sk",
   "video": "",
+  "glyph": "",
   "chips": [
    "+",
    "−",
@@ -1594,6 +1606,359 @@ window.LESSONS = [
   "added": 1794905948
  },
  {
+  "id": "1-math-hicheel_13",
+  "subject": "math",
+  "type": "math",
+  "grade": 1,
+  "number": 13,
+  "title": "Тоолж сурцгаая!",
+  "youtube_id": "v1OO3nYSUwQ",
+  "video": "",
+  "glyph": "1-р 2-р",
+  "chips": [
+   "1-р",
+   "2-р",
+   "3-р",
+   "4-р",
+   "5-р"
+  ],
+  "new_chips": [
+   "1-р",
+   "2-р",
+   "3-р",
+   "4-р",
+   "5-р"
+  ],
+  "topic": "Дэс дугаар",
+  "nums": [
+   {
+    "n": 1,
+    "ord": true,
+    "word": "нэгдүгээр",
+    "emoji": "🐻",
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ]
+   },
+   {
+    "n": 2,
+    "ord": true,
+    "word": "хоёрдугаар",
+    "emoji": "🐰",
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ]
+   },
+   {
+    "n": 3,
+    "ord": true,
+    "word": "гуравдугаар",
+    "emoji": "🦊",
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ]
+   },
+   {
+    "n": 4,
+    "ord": true,
+    "word": "дөрөвдүгээр",
+    "emoji": "🐸",
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ]
+   },
+   {
+    "n": 5,
+    "ord": true,
+    "word": "тавдугаар",
+    "emoji": "🐥",
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ]
+   }
+  ],
+  "problems": [
+   {
+    "row": [
+     "🐶",
+     "🐱",
+     "🐭",
+     "🐹",
+     "🐰"
+    ],
+    "ring": 2,
+    "t": [
+     "3-р"
+    ],
+    "h": 0,
+    "a": "audio/1a08fb1263cfcac2.mp3"
+   },
+   {
+    "row": [
+     "🚗",
+     "🚕",
+     "🚙",
+     "🚌",
+     "🚓",
+     "🚑"
+    ],
+    "ring": 4,
+    "t": [
+     "5-р"
+    ],
+    "h": 0,
+    "a": "audio/1e021a959b05e3b5.mp3"
+   },
+   {
+    "row": [
+     "🐟",
+     "🐠",
+     "🐡",
+     "🐙"
+    ],
+    "ring": 1,
+    "t": [
+     "2-р"
+    ],
+    "h": 0,
+    "a": "audio/1eda737eb9479192.mp3"
+   },
+   {
+    "row": [
+     "🌷",
+     "🌻",
+     "🌹",
+     "🌼",
+     "🌸",
+     "🌺",
+     "🌷"
+    ],
+    "ring": 5,
+    "t": [
+     "6-р"
+    ],
+    "h": 0,
+    "a": "audio/f5822190f41af516.mp3"
+   },
+   {
+    "row": [
+     "⚽",
+     "🏀",
+     "🏈",
+     "⚾",
+     "🎾",
+     "🏐",
+     "🏉",
+     "🎱",
+     "🏓"
+    ],
+    "ring": 7,
+    "t": [
+     "8-р"
+    ],
+    "h": 0,
+    "a": "audio/8c271c766e6b94ac.mp3"
+   },
+   {
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ],
+    "ring": 1,
+    "t": [
+     "зүүн",
+     "2-р"
+    ],
+    "h": 1,
+    "a": "audio/cf1959f79848f584.mp3"
+   },
+   {
+    "row": [
+     "🐻",
+     "🐰",
+     "🦊",
+     "🐸",
+     "🐥"
+    ],
+    "ring": 1,
+    "t": [
+     "баруун",
+     "4-р"
+    ],
+    "h": 1,
+    "right": true,
+    "a": "audio/672f51883b81aae3.mp3"
+   },
+   {
+    "row": [
+     "🍎",
+     "🍌",
+     "🍇",
+     "🍓",
+     "🍊",
+     "🍐"
+    ],
+    "ring": 3,
+    "t": [
+     "зүүн",
+     "4-р"
+    ],
+    "h": 1,
+    "a": "audio/31a5806f95061adb.mp3"
+   },
+   {
+    "row": [
+     "🍎",
+     "🍌",
+     "🍇",
+     "🍓",
+     "🍊",
+     "🍐"
+    ],
+    "ring": 3,
+    "t": [
+     "баруун",
+     "3-р"
+    ],
+    "h": 1,
+    "right": true,
+    "a": "audio/3b3e2d1456da94c3.mp3"
+   },
+   {
+    "row": [
+     "🎈",
+     "🎈",
+     "🎈",
+     "🎈",
+     "🎈",
+     "🎈"
+    ],
+    "ring": 3,
+    "t": [
+     "4-р"
+    ],
+    "h": 0,
+    "right": false,
+    "a": "audio/014aa3e679cc5e3f.mp3"
+   },
+   {
+    "row": [
+     "🐥",
+     "🐥",
+     "🐥",
+     "🐥",
+     "🐥",
+     "🐥",
+     "🐥"
+    ],
+    "ring": 5,
+    "t": [
+     "6-р"
+    ],
+    "h": 0,
+    "right": false,
+    "a": "audio/ccbdd1a05d0a8420.mp3"
+   },
+   {
+    "row": [
+     "🚗",
+     "🚗",
+     "🚗",
+     "🚗",
+     "🚗"
+    ],
+    "ring": 3,
+    "t": [
+     "2-р"
+    ],
+    "h": 0,
+    "right": true,
+    "a": "audio/fcf138f9622f4f37.mp3"
+   },
+   {
+    "row": [
+     "⭐",
+     "⭐",
+     "⭐",
+     "⭐",
+     "⭐",
+     "⭐",
+     "⭐",
+     "⭐"
+    ],
+    "ring": 7,
+    "t": [
+     "8-р"
+    ],
+    "h": 0,
+    "right": false,
+    "a": "audio/6277fd03b63efa81.mp3"
+   }
+  ],
+  "game": {
+   "kind": "ordinal",
+   "max": 10
+  },
+  "num_audio": [
+   "audio/a561a76400c1e96d.mp3",
+   "audio/39fd9a6d8d631106.mp3",
+   "audio/b3ce657f9ca4ad9b.mp3",
+   "audio/2cd6539cff19d368.mp3",
+   "audio/2b01aaf591d818d6.mp3",
+   "audio/e50f7a89deee9f87.mp3",
+   "audio/2cacd7b096b4b680.mp3",
+   "audio/ce0e43c3dca29a85.mp3",
+   "audio/bb58e42f8b59e820.mp3",
+   "audio/50e00a29a2e4b25f.mp3",
+   "audio/4ed423d7a7ff7204.mp3"
+  ],
+  "ord_audio": [
+   "",
+   "audio/cb98d0cbee3847ed.mp3",
+   "audio/60c85c9f2ad058f8.mp3",
+   "audio/fa3add0d1864bfe0.mp3",
+   "audio/ed7a9cb13454f4c5.mp3",
+   "audio/78276b46b407ec68.mp3",
+   "audio/0284853bd9dd39ef.mp3",
+   "audio/ca3bc3fd72b4cb6e.mp3",
+   "audio/1506ea29b0ee0ccc.mp3",
+   "audio/dd596bee9e63ad7b.mp3",
+   "audio/168d082ca9c125e9.mp3"
+  ],
+  "ord_q_audio": "audio/aed0ab28d8bdceeb.mp3",
+  "q_audio": "audio/a5c7f4decf589ed4.mp3",
+  "cmp_audio": {
+   "<": "audio/012767f502862de4.mp3",
+   ">": "audio/31ec662d2b3f2c6a.mp3",
+   "=": "audio/8347b987d02ee978.mp3"
+  },
+  "poster": "img/1-math-hicheel_13.png",
+  "added": 1795154199
+ },
+ {
   "id": "hicheel_01",
   "subject": "mongol",
   "type": "reading",
@@ -1604,6 +1969,8 @@ window.LESSONS = [
   "new": "а",
   "youtube_id": "8hWS-3bB4Ug",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -1690,6 +2057,8 @@ window.LESSONS = [
   "new": "э",
   "youtube_id": "ONucCILFcUQ",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -1797,6 +2166,8 @@ window.LESSONS = [
   "new": "и",
   "youtube_id": "3y656y6VcW4",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -1910,6 +2281,8 @@ window.LESSONS = [
   "new": "й",
   "youtube_id": "zs0vvQfUDYc",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -2062,6 +2435,8 @@ window.LESSONS = [
   "new": "ы",
   "youtube_id": "ASprvTKOAvI",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -2231,6 +2606,8 @@ window.LESSONS = [
   "new": "м",
   "youtube_id": "tiLkX5DsTTU",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -2416,6 +2793,7 @@ window.LESSONS = [
     "s": "Ийм ам.",
     "a": "audio/048ce13a6e2c189d.mp3",
     "emoji": "👄",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -2431,6 +2809,7 @@ window.LESSONS = [
     "s": "Ийм эм.",
     "a": "audio/11021e69420e98be.mp3",
     "emoji": "💊",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -2446,6 +2825,7 @@ window.LESSONS = [
     "s": "Ай, эмээ!",
     "a": "audio/ec660f13951217d4.mp3",
     "emoji": "👵",
+    "story": false,
     "words": [
      {
       "t": "Ай,",
@@ -2461,6 +2841,7 @@ window.LESSONS = [
     "s": "Эмээ, ийм эм!",
     "a": "audio/72875fcbdb079586.mp3",
     "emoji": "👵💊",
+    "story": false,
     "words": [
      {
       "t": "Эмээ,",
@@ -2524,6 +2905,8 @@ window.LESSONS = [
   "new": "с",
   "youtube_id": "zwuRPKm2Flg",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -2788,6 +3171,7 @@ window.LESSONS = [
     "s": "Ийм сам.",
     "a": "audio/28d0c0dc6026fe52.mp3",
     "emoji": "🪮",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -2803,6 +3187,7 @@ window.LESSONS = [
     "s": "Ийм эм.",
     "a": "audio/11021e69420e98be.mp3",
     "emoji": "💊",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -2818,6 +3203,7 @@ window.LESSONS = [
     "s": "Ай, эмээ!",
     "a": "audio/ec660f13951217d4.mp3",
     "emoji": "👵",
+    "story": false,
     "words": [
      {
       "t": "Ай,",
@@ -2833,6 +3219,7 @@ window.LESSONS = [
     "s": "Эмээ, ийм сам!",
     "a": "audio/fce783ed8bd16a76.mp3",
     "emoji": "👵🪮",
+    "story": false,
     "words": [
      {
       "t": "Эмээ,",
@@ -2911,6 +3298,8 @@ window.LESSONS = [
   "new": "р",
   "youtube_id": "46oMJQSWnYE",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -3160,6 +3549,7 @@ window.LESSONS = [
     "s": "Ийм сар!",
     "a": "audio/39034a920152e52a.mp3",
     "emoji": "🌙",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -3175,6 +3565,7 @@ window.LESSONS = [
     "s": "Эмээ, сар!",
     "a": "audio/2d00aca73b0c53c9.mp3",
     "emoji": "👵🌙",
+    "story": false,
     "words": [
      {
       "t": "Эмээ,",
@@ -3190,6 +3581,7 @@ window.LESSONS = [
     "s": "Ай, Сараа!",
     "a": "audio/4e00515bcdd824c1.mp3",
     "emoji": "👧",
+    "story": false,
     "words": [
      {
       "t": "Ай,",
@@ -3205,6 +3597,7 @@ window.LESSONS = [
     "s": "Сараа, ийм сам.",
     "a": "audio/998d1dad86040d21.mp3",
     "emoji": "👧🪮",
+    "story": false,
     "words": [
      {
       "t": "Сараа,",
@@ -3283,6 +3676,8 @@ window.LESSONS = [
   "new": "х",
   "youtube_id": "GgrAYwnJ3K8",
   "video": "",
+  "topic": "",
+  "glyph": "",
   "letter_cards": [
    {
     "ch": "а",
@@ -3519,6 +3914,7 @@ window.LESSONS = [
     "s": "Ийм их мах!",
     "a": "audio/547edc4fe107baad.mp3",
     "emoji": "🥩",
+    "story": false,
     "words": [
      {
       "t": "Ийм",
@@ -3538,6 +3934,7 @@ window.LESSONS = [
     "s": "Хар хэрэм.",
     "a": "audio/0b0c0b6565324ada.mp3",
     "emoji": "🐿️",
+    "story": false,
     "words": [
      {
       "t": "Хар",
@@ -3553,6 +3950,7 @@ window.LESSONS = [
     "s": "Ахаа, хэрэм!",
     "a": "audio/9c0a6434ab271f96.mp3",
     "emoji": "👦🐿️",
+    "story": false,
     "words": [
      {
       "t": "Ахаа,",
@@ -3568,6 +3966,7 @@ window.LESSONS = [
     "s": "Эмээ, ийм хамар.",
     "a": "audio/076e998559492d15.mp3",
     "emoji": "👵👃",
+    "story": false,
     "words": [
      {
       "t": "Эмээ,",
@@ -3663,5 +4062,436 @@ window.LESSONS = [
   ],
   "poster": "img/hicheel_09.png",
   "added": 1794970034
+ },
+ {
+  "id": "hicheel_10",
+  "subject": "mongol",
+  "type": "reading",
+  "grade": 1,
+  "number": 10,
+  "title": "Уншиж сурцгаая!",
+  "letters": "аэийымсрх",
+  "new": "",
+  "youtube_id": "Y2h8EQOKPPM",
+  "video": "",
+  "topic": "Задгай, битүү үе",
+  "glyph": "ма ам",
+  "letter_cards": [
+   {
+    "ch": "а",
+    "a": "audio/f13d5c82a872b135.mp3"
+   },
+   {
+    "ch": "э",
+    "a": "audio/edde55db571d52c4.mp3"
+   },
+   {
+    "ch": "и",
+    "a": "audio/8cc7099d94e374f5.mp3"
+   },
+   {
+    "ch": "й",
+    "a": "audio/4205a9cab226b607.mp3"
+   },
+   {
+    "ch": "ы",
+    "a": "audio/80ac3b5601d000c4.mp3"
+   },
+   {
+    "ch": "м",
+    "a": "audio/1f359312b8b20b1b.mp3"
+   },
+   {
+    "ch": "с",
+    "a": "audio/1fa289254a71a306.mp3"
+   },
+   {
+    "ch": "р",
+    "a": "audio/8b2046343c376507.mp3"
+   },
+   {
+    "ch": "х",
+    "a": "audio/e0be8c3a8966e8e8.mp3"
+   }
+  ],
+  "syllables": [
+   [
+    {
+     "t": "ма",
+     "a": "audio/6345d1cb358d7bd0.mp3"
+    },
+    {
+     "t": "мэ",
+     "a": "audio/fe4e41ae103a6cd7.mp3"
+    },
+    {
+     "t": "ми",
+     "a": "audio/866cefde8ce9e9fe.mp3"
+    },
+    {
+     "t": "мы",
+     "a": "audio/8fc5214947a914fa.mp3"
+    }
+   ],
+   [
+    {
+     "t": "са",
+     "a": "audio/4d2056f6ec280826.mp3"
+    },
+    {
+     "t": "сэ",
+     "a": "audio/c2e888a3441d2292.mp3"
+    },
+    {
+     "t": "си",
+     "a": "audio/db9f57292e60104a.mp3"
+    },
+    {
+     "t": "сы",
+     "a": "audio/5b2f44ab4a82671a.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ра",
+     "a": "audio/c57b1e581cd4f092.mp3"
+    },
+    {
+     "t": "рэ",
+     "a": "audio/9b6d9acbea09271f.mp3"
+    },
+    {
+     "t": "ри",
+     "a": "audio/17a5bc59394e50a0.mp3"
+    },
+    {
+     "t": "ры",
+     "a": "audio/16af1715a7ff8e86.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ха",
+     "a": "audio/da249a898bed6ad5.mp3"
+    },
+    {
+     "t": "хэ",
+     "a": "audio/2fc6ca2a57f34295.mp3"
+    },
+    {
+     "t": "хи",
+     "a": "audio/9c48bc49d7f1b593.mp3"
+    },
+    {
+     "t": "хы",
+     "a": "audio/8a22b991ca7b55f5.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ам",
+     "a": "audio/b008a176d33c90ce.mp3"
+    },
+    {
+     "t": "эм",
+     "a": "audio/9c1e73d29e1115b0.mp3"
+    },
+    {
+     "t": "им",
+     "a": "audio/ce0774e47f090e42.mp3"
+    },
+    {
+     "t": "ым",
+     "a": "audio/0b9a3bd4d26a8d23.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ас",
+     "a": "audio/3ed2c66e286f3551.mp3"
+    },
+    {
+     "t": "эс",
+     "a": "audio/fcba2bd36fac4f32.mp3"
+    },
+    {
+     "t": "ис",
+     "a": "audio/d69bc7df396f7126.mp3"
+    },
+    {
+     "t": "ыс",
+     "a": "audio/726d7c4bb0df694b.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ар",
+     "a": "audio/ab1e0e5f991a2e72.mp3"
+    },
+    {
+     "t": "эр",
+     "a": "audio/4d16046662433bb1.mp3"
+    },
+    {
+     "t": "ир",
+     "a": "audio/92d9ab5c460f655b.mp3"
+    },
+    {
+     "t": "ыр",
+     "a": "audio/19c3ac0fe5b3baaa.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ах",
+     "a": "audio/9af1980ae8a85fdb.mp3"
+    },
+    {
+     "t": "эх",
+     "a": "audio/6b8ecad5ec191f74.mp3"
+    },
+    {
+     "t": "их",
+     "a": "audio/9ddfa7ee135296ad.mp3"
+    },
+    {
+     "t": "ых",
+     "a": "audio/c5374d5628702e71.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ай",
+     "a": "audio/4c676ac8002ac24d.mp3"
+    },
+    {
+     "t": "эй",
+     "a": "audio/4bb3d5e3ae10648b.mp3"
+    },
+    {
+     "t": "ий",
+     "a": "audio/92cd4ced9eb3179c.mp3"
+    },
+    {
+     "t": "ый",
+     "a": "audio/fb8b2bf761d5e6ac.mp3"
+    }
+   ]
+  ],
+  "words": [
+   {
+    "w": "самар",
+    "a": "audio/d1045e6fc545343d.mp3",
+    "emoji": "🌰",
+    "syl": [
+     {
+      "t": "са",
+      "a": "audio/4d2056f6ec280826.mp3"
+     },
+     {
+      "t": "мар",
+      "a": "audio/5a9651ed5c24dd25.mp3"
+     }
+    ]
+   },
+   {
+    "w": "хэрэм",
+    "a": "audio/6b46b75cab6bddfa.mp3",
+    "emoji": "🐿️",
+    "syl": [
+     {
+      "t": "хэ",
+      "a": "audio/2fc6ca2a57f34295.mp3"
+     },
+     {
+      "t": "рэм",
+      "a": "audio/eee994f4db18186f.mp3"
+     }
+    ]
+   },
+   {
+    "w": "хамар",
+    "a": "audio/fa542eaee2fe4688.mp3",
+    "emoji": "👃",
+    "syl": [
+     {
+      "t": "ха",
+      "a": "audio/da249a898bed6ad5.mp3"
+     },
+     {
+      "t": "мар",
+      "a": "audio/5a9651ed5c24dd25.mp3"
+     }
+    ]
+   },
+   {
+    "w": "эмээ",
+    "a": "audio/75c5050bc06a9df9.mp3",
+    "emoji": "👵",
+    "syl": [
+     {
+      "t": "э",
+      "a": "audio/3292c8498b48d9c9.mp3"
+     },
+     {
+      "t": "мээ",
+      "a": "audio/fa656b1f85a24181.mp3"
+     }
+    ]
+   },
+   {
+    "w": "ахаа",
+    "a": "audio/4ed90baaec2aad28.mp3",
+    "emoji": "👦",
+    "syl": [
+     {
+      "t": "а",
+      "a": "audio/3c0ef64aecd4ae58.mp3"
+     },
+     {
+      "t": "хаа",
+      "a": "audio/99412dba82318778.mp3"
+     }
+    ]
+   }
+  ],
+  "sentences": [
+   {
+    "s": "Ахаа, хар!",
+    "a": "audio/f4f5f5645d551769.mp3",
+    "emoji": "👧",
+    "story": true,
+    "words": [
+     {
+      "t": "Ахаа,",
+      "a": "audio/4ed90baaec2aad28.mp3"
+     },
+     {
+      "t": "хар!",
+      "a": "audio/4e3eb35367fb9add.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Ийм хар хэрэм!",
+    "a": "audio/9243ce96364f036b.mp3",
+    "emoji": "🐿️",
+    "story": true,
+    "words": [
+     {
+      "t": "Ийм",
+      "a": "audio/2426b21c9d753dae.mp3"
+     },
+     {
+      "t": "хар",
+      "a": "audio/4e3eb35367fb9add.mp3"
+     },
+     {
+      "t": "хэрэм!",
+      "a": "audio/6b46b75cab6bddfa.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Хэрэм, ир!",
+    "a": "audio/06ef1807d3a0b279.mp3",
+    "emoji": "👋",
+    "story": true,
+    "words": [
+     {
+      "t": "Хэрэм,",
+      "a": "audio/6b46b75cab6bddfa.mp3"
+     },
+     {
+      "t": "ир!",
+      "a": "audio/92d9ab5c460f655b.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Эмээ, самар!",
+    "a": "audio/3ac208598198c49c.mp3",
+    "emoji": "👵",
+    "story": true,
+    "words": [
+     {
+      "t": "Эмээ,",
+      "a": "audio/75c5050bc06a9df9.mp3"
+     },
+     {
+      "t": "самар!",
+      "a": "audio/d1045e6fc545343d.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Ийм их самар!",
+    "a": "audio/b93224f8176bdbca.mp3",
+    "emoji": "🌰",
+    "story": true,
+    "words": [
+     {
+      "t": "Ийм",
+      "a": "audio/2426b21c9d753dae.mp3"
+     },
+     {
+      "t": "их",
+      "a": "audio/9ddfa7ee135296ad.mp3"
+     },
+     {
+      "t": "самар!",
+      "a": "audio/d1045e6fc545343d.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Хэрэм, самар!",
+    "a": "audio/1c6500f5ada15b03.mp3",
+    "emoji": "🐿️🌰",
+    "story": true,
+    "words": [
+     {
+      "t": "Хэрэм,",
+      "a": "audio/6b46b75cab6bddfa.mp3"
+     },
+     {
+      "t": "самар!",
+      "a": "audio/d1045e6fc545343d.mp3"
+     }
+    ]
+   }
+  ],
+  "listen": [],
+  "story_title": "Хар хэрэм",
+  "story_emoji": "🐿️",
+  "game": [
+   {
+    "w": "самар",
+    "a": "audio/d1045e6fc545343d.mp3",
+    "emoji": "🌰"
+   },
+   {
+    "w": "хэрэм",
+    "a": "audio/6b46b75cab6bddfa.mp3",
+    "emoji": "🐿️"
+   },
+   {
+    "w": "хамар",
+    "a": "audio/fa542eaee2fe4688.mp3",
+    "emoji": "👃"
+   },
+   {
+    "w": "эмээ",
+    "a": "audio/75c5050bc06a9df9.mp3",
+    "emoji": "👵"
+   },
+   {
+    "w": "ахаа",
+    "a": "audio/4ed90baaec2aad28.mp3",
+    "emoji": "👦"
+   }
+  ],
+  "poster": "img/hicheel_10.png",
+  "added": 1795154234
  }
 ];

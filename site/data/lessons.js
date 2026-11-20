@@ -2060,8 +2060,8 @@ window.LESSONS = [
   "title": "Уншиж сурцгаая!",
   "letters": "аэийы",
   "new": "ы",
-  "youtube_id": "",
-  "video": "videos/hicheel_05.mp4",
+  "youtube_id": "ASprvTKOAvI",
+  "video": "",
   "letter_cards": [
    {
     "ch": "а",

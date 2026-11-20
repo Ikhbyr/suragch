@@ -25,11 +25,35 @@ SITE = os.path.join(ROOT, "site")
 
 def math_data(cfg, R, N):
     """Математикийн хичээл: тооны карт, бодлого, тоглоомын тохиргоо."""
-    from make_math import NOM, ATTR, expr_sentence, cmp_sign
+    from make_math import NOM, ATTR, ORD, ORDT, expr_sentence, cmp_sign
     nums, problems, maxn, kinds = [], [], 0, set()
     for sec in cfg["sections"]:
         for it in sec["items"]:
             ty = it["type"]
+            if ty in ("ordinal", "which", "find", "sides"):   # дэс дугаар
+                kinds.add("ordinal")
+                row = it["row"]
+                maxn = max(maxn, len(row))
+                if ty == "ordinal" and not nums:
+                    nums += [{"n": i + 1, "ord": True, "word": ORD[i + 1], "emoji": row[i], "row": row}
+                             for i in range(len(row))]
+                elif ty == "which":
+                    n = it["target"] + 1
+                    names = it.get("names")
+                    ans = it.get("answer") or (f"{M.cap(names[n - 1])} {ORDT[n]} байна." if names else M.cap(ORD[n]) + ".")
+                    problems.append({"row": row, "ring": n - 1, "t": [f"{n}-р"], "h": 0, "a": N(ans)})
+                elif ty == "find":
+                    n, k = it["n"], len(row)
+                    i = k - n if it.get("from") == "right" else n - 1
+                    problems.append({"row": row, "ring": i, "t": [f"{n}-р"], "h": 0, "right": it.get("from") == "right",
+                                     "a": N(it.get("answer") or f"Энэ бол {ORD[n]}.")})
+                elif ty == "sides":
+                    i, k, names = it["target"], len(row), it["names"]
+                    problems.append({"row": row, "ring": i, "t": ["зүүн", f"{i + 1}-р"], "h": 1,
+                                     "a": N(f"{M.cap(names[i])} зүүн талаас {ORDT[i + 1]} байна.")})
+                    problems.append({"row": row, "ring": i, "t": ["баруун", f"{k - i}-р"], "h": 1, "right": True,
+                                     "a": N(f"{M.cap(names[i])} баруун талаас {ORDT[k - i]} байна.")})
+                continue
             kinds.add(ty if ty != "expr" else ("compare" if it["op"] in "<>=" else "sub" if it["op"] != "+" else "add"))
             for k in ("n", "a", "b", "to", "from"):
                 if isinstance(it.get(k), int):
@@ -52,7 +76,9 @@ def math_data(cfg, R, N):
                 n, a, b = it["n"], it["a"], it["b"]
                 problems.append({"t": [str(n), "→", str(a), "ба", str(b)], "h": 4, "emoji": e,
                                  "a": N(it.get("say") or f"{M.cap(NOM[n])} бол {NOM[a]} ба {NOM[b]}.")})
-    if {"add", "sub"} <= kinds or ("compare" in kinds and ({"add", "sub"} & kinds)):
+    if "ordinal" in kinds:
+        game = "ordinal"
+    elif {"add", "sub"} <= kinds or ("compare" in kinds and ({"add", "sub"} & kinds)):
         game = "mix"
     elif "add" in kinds:
         game = "add"
@@ -69,6 +95,8 @@ def math_data(cfg, R, N):
         "topic": cfg["topic"], "nums": nums, "problems": problems,
         "game": {"kind": game, "max": max(3, min(10, maxn))},
         "num_audio": [R(M.cap(w) + ".") for w in NOM],
+        **({"ord_audio": [R(M.cap(w) + ".") if w else "" for w in ORD], "ord_q_audio": N("Хэд дэх вэ?")}
+           if "ordinal" in kinds else {}),
         "q_audio": N("Хэд байна?"),
         "cmp_audio": {"<": N("Бага."), ">": N("Их."), "=": N("Тэнцүү.")},
     }
@@ -95,7 +123,8 @@ def build_lesson(path):
     if cfg.get("type") == "math":
         data = {"id": name, "subject": cfg.get("subject", "math"), "type": "math", "grade": cfg.get("grade", 1),
                 "number": cfg.get("lesson_number"), "title": cfg.get("title", ""),
-                "youtube_id": cfg.get("youtube_id", ""), "video": "", **math_data(cfg, R, N)}
+                "youtube_id": cfg.get("youtube_id", ""), "video": "", "glyph": cfg.get("glyph", ""),
+                **math_data(cfg, R, N)}
         return finish(data, tts, name)
 
     letters = cfg["letters"]
@@ -111,6 +140,8 @@ def build_lesson(path):
         "new": cfg.get("new_letters", ""),
         "youtube_id": cfg.get("youtube_id", ""),
         "video": "",
+        "topic": cfg.get("topic", "") if not cfg.get("new_letters") else "",
+        "glyph": cfg.get("glyph", ""),
         "letter_cards": [],
         "syllables": [[{"t": s, "a": R(M.cap(s) + ".")} for s in g] for g in lesson.syllable_groups()],
         "words": [],
@@ -135,10 +166,14 @@ def build_lesson(path):
         if w.get("explain"):
             item.update(explain=w["explain"], xa=N(w["explain"]))
         data["words"].append(item)
-    for s in cfg.get("sentences", []):
+    story = cfg.get("story")
+    if story:
+        data["story_title"] = story["title"]
+        data["story_emoji"] = story.get("emoji", "")
+    for s, is_story in [(x, False) for x in cfg.get("sentences", [])] + [(x, True) for x in (story or {}).get("sentences", [])]:
         toks = s["s"].split(" ")
         data["sentences"].append({
-            "s": s["s"], "a": R(s["s"]), "emoji": s.get("emoji", ""),
+            "s": s["s"], "a": R(s["s"]), "emoji": s.get("emoji", ""), "story": is_story,
             "words": [{"t": tk, "a": R(M.cap(tk.strip(",.!?")) + ".")} for tk in toks],
         })
     # тоглоомд ашиглах үгс (давхардалгүй)

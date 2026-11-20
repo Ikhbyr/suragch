@@ -17,6 +17,10 @@ JSON бүтэц (lessons/1/math/hicheel_01.json):
   add      {a, b, emoji, obj, say1?, say2?, story?}   нэмэх (story: тоолохгүй, асуулт болгоно)
   sub      {a, b, emoji, obj, say1?, say2?, story?}   хасах
   expr     {a, op, b}                      "2 + 1 = ?" асуулт (op: + − <>)
+  ordinal  {row: [emoji...], say?}         эгнээг дэс дугаараар тоолно (нэгдүгээр, хоёрдугаар...)
+  which    {row, target, names?, ask?, answer?}   тэмдэглэсэн зүйл хэд дэх вэ? (target: 0-ээс)
+  find     {row, n, from?, ask?, answer?}  n-р зүйлийг олох (from: "right" бол баруунаас)
+  sides    {row, target, names}            зүүн, баруун талаас хэд дэх вэ
 """
 import math
 import random
@@ -36,11 +40,15 @@ COM = ["тэгтэй", "нэгтэй", "хоёртой", "гуравтай", "д
 ACC = ["тэгийг", "нэгийг", "хоёрыг", "гурвыг", "дөрвийг", "тавыг", "зургааг", "долоог", "наймыг",
        "есийг", "арвыг"]
 OPS = {"+": "нэмэх", "−": "хасах", "-": "хасах"}
+# Дэс дугаар: нэгдүгээр... аравдугаар, байрын тийн ялгал (+т)
+ORD = ["", "нэгдүгээр", "хоёрдугаар", "гуравдугаар", "дөрөвдүгээр", "тавдугаар", "зургадугаар",
+       "долдугаар", "наймдугаар", "есдүгээр", "аравдугаар"]
+ORDT = [w + "т" if w else "" for w in ORD]
 
 SECTION_COLORS = {
     "learn": (255, 138, 60), "count": (67, 170, 80), "seq": (33, 140, 230), "compare": (150, 60, 180),
     "split": (0, 150, 160), "add": (67, 170, 80), "sub": (33, 140, 230), "quiz": (235, 70, 70),
-    "story": (230, 110, 160),
+    "story": (230, 110, 160), "order": (236, 104, 24), "sides": (150, 60, 180),
 }
 C_RING = (255, 214, 80)
 C_GHOST = (205, 210, 222)
@@ -80,6 +88,27 @@ def label(d, text, x, y, size=34, fill=C_NUM):
     draw_word(d, text, x, y, size, color=fill)
 
 
+def ord_label(d, n, x, y, size=30, scale=1.0, fill=C_WHITE, outline=(240, 220, 190)):
+    """"3-р" шошго (дэс дугаар)."""
+    if scale <= 0.05:
+        return
+    size *= scale
+    text = f"{n}-р"
+    w = M.word_width(text, size) + size * 0.7
+    h = size * 1.35
+    d.rounded_rectangle([x - w / 2, y - h / 2, x + w / 2, y + h / 2], int(h / 2), fill=fill,
+                        outline=outline, width=3)
+    draw_word(d, text, x, y, size, ref="0")
+
+
+def row_layout(k, cy=320):
+    """Эгнээний байрлал: k зүйл дэлгэцийн өргөнд багтана."""
+    step = min(150, (W - 220) / k)
+    size = min(105, step * 0.66)
+    xs = [W / 2 + (i - (k - 1) / 2) * step for i in range(k)]
+    return xs, cy, size
+
+
 class MathLesson(M.Lesson):
     def __init__(self, cfg, tts):
         self.cfg, self.tts = cfg, tts
@@ -116,7 +145,8 @@ class MathLesson(M.Lesson):
                 draw_text_center(d, f"{num}-р хичээл: {cfg['topic']}", W / 2, 320, 46 * pop(t, 0.6), C_INK)
             for i, ch in enumerate(chips):
                 x, y = pos[i]
-                draw_tile(d, ch, x, y, cell, cell, scale=pop(t, t_l + i * step), text_size=cell * 0.62,
+                draw_tile(d, ch, x, y, cell, cell, scale=pop(t, t_l + i * step),
+                          text_size=cell * (0.62 if len(ch) <= 2 else 0.4),
                           fill=(255, 244, 196) if ch in self.new_chips else C_WHITE)
         tl.add(length, draw, overlay=False)
 
@@ -634,13 +664,219 @@ class MathLesson(M.Lesson):
             self.progress(d, idx, total, ok)
         tl.add(length, draw)
 
+    # -- дэс дугаар -----------------------------------------------------
+    def ordn(self, n):
+        return self.read(cap(ORD[n]) + ".")
+
+    def _row(self, d, fr, tt, row, xs, cy, size, appear=0.05, ring=None, bounce=None, dim=None):
+        for i, e in enumerate(row):
+            x = xs[i]
+            sc = pop(tt, appear + i * 0.05)
+            if ring is not None and i == ring:
+                d.ellipse([x - size * 0.66, cy - size * 0.66, x + size * 0.66, cy + size * 0.66], fill=(255, 241, 190))
+                ring_r = size * 0.66
+                d.ellipse([x - ring_r, cy - ring_r, x + ring_r, cy + ring_r], outline=(235, 70, 70), width=6)
+            b = 1.0
+            if bounce is not None and i == bounce:
+                b = 1 + 0.06 * math.sin(2 * math.pi * 1.6 * tt)
+            paste_emoji(fr, e, x, cy, size * sc * b)
+
+    def ordinal(self, it):
+        tl, row = self.tl, it["row"]
+        k = len(row)
+        xs, cy, size = row_layout(k)
+        tl.sound(0.05, SFX_POP)
+        t = 0.9 + k * 0.05
+        steps = []
+        for i in range(k):
+            a = self.ordn(i + 1)
+            tl.sound(t, SFX_TICK)
+            tl.sound(t + 0.05, a)
+            steps.append(t)
+            t += 0.05 + dur(a) + 0.3
+        if it.get("say"):
+            t += 0.3
+            s = self.say(it["say"])
+            tl.sound(t, s)
+            t += dur(s)
+        length = t + 1.6 + self.extra
+        ly = cy + size * 0.95
+
+        def draw(fr, d, tt):
+            cur = next((i for i in range(k) if steps[i] <= tt < (steps[i + 1] if i + 1 < k else steps[i] + 1.0)), None)
+            self._row(d, fr, tt, row, xs, cy, size, ring=cur)
+            for i in range(k):
+                if tt >= steps[i]:
+                    ord_label(d, i + 1, xs[i], ly, 30 if k <= 7 else 24, pop(tt, steps[i], 0.3),
+                              fill=C_HL if i == cur else C_WHITE)
+            # тоолох чиглэл: зүүнээс баруун тийш
+            ax0, ax1, ay = xs[0] - size * 0.4, xs[-1] + size * 0.4, cy - size * 0.95
+            pa = clamp((tt - 0.4) / 0.6)
+            if pa > 0:
+                xe = ax0 + (ax1 - ax0) * ease_out(pa)
+                d.line([ax0, ay, xe, ay], fill=(150, 160, 185), width=6)
+                d.polygon([(xe + 16, ay), (xe - 6, ay - 13), (xe - 6, ay + 13)], fill=(150, 160, 185))
+            draw_your_turn(fr, tt, steps[-1] + 0.6, length)
+        tl.add(length, draw)
+
+    def _reveal_count(self, t, n, from_right=False):
+        """Хариу харуулахад 1..n хүртэл хурдан дугаарлана (дуугүй, жижиг тиктэй)."""
+        steps = []
+        for i in range(n):
+            self.tl.sound(t, SFX_TICK)
+            steps.append(t)
+            t += 0.22
+        return steps, t
+
+    def which(self, it, idx, total):
+        tl, row, tgt = self.tl, it["row"], it["target"]
+        k, n = len(row), it["target"] + 1
+        xs, cy, size = row_layout(k, 300)
+        names = it.get("names")
+        q = self.say(it.get("ask") or (f"{cap(names[tgt])} хэд дэх вэ?" if names else "Энэ хэд дэх вэ?"))
+        tl.sound(0.05, SFX_POP)
+        tl.sound(0.5, q)
+        t0 = 0.5 + dur(q) + 0.3
+        for j in range(3):
+            tl.sound(t0 + j, SFX_TICK)
+        steps, t = self._reveal_count(t0 + 3, n)
+        t_rev = t + 0.05
+        a = self.say(it.get("answer") or (f"{cap(names[tgt])} {ORDT[n]} байна." if names else cap(ORD[n]) + "."))
+        tl.sound(t_rev, SFX_DING)
+        tl.sound(t_rev + 0.15, a)
+        length = t_rev + 0.15 + dur(a) + 1.4 + self.extra / 2
+        ly = cy + size * 0.95
+
+        def draw(fr, d, tt):
+            ok = tt >= t_rev
+            self._row(d, fr, tt, row, xs, cy, size, ring=tgt, bounce=None if ok else tgt)
+            for i, st in enumerate(steps):
+                if tt >= st:
+                    ord_label(d, i + 1, xs[i], ly, 28 if k <= 7 else 22, pop(tt, st, 0.25),
+                              fill=C_OK if (i == tgt and ok) else C_WHITE)
+            draw_tile(d, f"{n}-р" if ok else "?", W / 2, 570, 190, 120, scale=pop(tt, 0.3), text_size=78,
+                      fill=C_OK if ok else C_WHITE, color=None if ok else (235, 70, 70))
+            if ok:
+                paste_emoji(fr, "⭐", W / 2 + 110, 515, 76 * pop(tt, t_rev))
+            self.countdown(d, tt, t0)
+            self.progress(d, idx, total, ok)
+        tl.add(length, draw)
+
+    def find(self, it, idx, total):
+        tl, row, n = self.tl, it["row"], it["n"]
+        k = len(row)
+        right = it.get("from") == "right"
+        tgt = k - n if right else n - 1
+        xs, cy, size = row_layout(k, 330)
+        q = self.say(it.get("ask") or f"{cap(ORD[n])} нь аль нь вэ?")
+        tl.sound(0.05, SFX_POP)
+        tl.sound(0.5, q)
+        t0 = 0.5 + dur(q) + 0.3
+        for j in range(3):
+            tl.sound(t0 + j, SFX_TICK)
+        steps, t = self._reveal_count(t0 + 3, n)
+        t_rev = t + 0.05
+        a = self.say(it.get("answer") or f"Энэ бол {ORD[n]}.")
+        tl.sound(t_rev, SFX_DING)
+        tl.sound(t_rev + 0.15, a)
+        length = t_rev + 0.15 + dur(a) + 1.4 + self.extra / 2
+        ly = cy + size * 0.95
+        order = list(range(k - 1, -1, -1)) if right else list(range(k))
+
+        def draw(fr, d, tt):
+            ok = tt >= t_rev
+            self._row(d, fr, tt, row, xs, cy, size, ring=tgt if ok else None)
+            for j, st in enumerate(steps):
+                if tt >= st:
+                    i = order[j]
+                    ord_label(d, j + 1, xs[i], ly, 28 if k <= 7 else 22, pop(tt, st, 0.25),
+                              fill=C_OK if (i == tgt and ok) else C_WHITE)
+            tag = "⬅️ Баруун талаас" if right else "➡️ Зүүн талаас"
+            draw_text_center(d, f"{n}-р", W / 2, 150, 70 * pop(tt, 0.2), (235, 70, 70))
+            draw_text_center(d, tag[2:].strip(), W / 2, 215, 34 * pop(tt, 0.3), C_INK)
+            if ok:
+                paste_emoji(fr, "⭐", xs[tgt] + size * 0.5, cy - size * 0.6, 64 * pop(tt, t_rev))
+            self.countdown(d, tt, t0)
+            self.progress(d, idx, total, ok)
+        tl.add(length, draw)
+
+    def sides(self, it):
+        tl, row, tgt, names = self.tl, it["row"], it["target"], it["names"]
+        k = len(row)
+        nl, nr = tgt + 1, k - tgt
+        xs, cy, size = row_layout(k, 330)
+        tl.sound(0.05, SFX_POP)
+        t = 0.8
+        h1 = self.say("Зүүн талаас тоолъё.")
+        tl.sound(t, h1)
+        t += dur(h1) + 0.3
+        left = []
+        for i in range(nl):
+            a = self.ordn(i + 1)
+            tl.sound(t, SFX_TICK)
+            tl.sound(t + 0.05, a)
+            left.append(t)
+            t += 0.05 + dur(a) + 0.25
+        s1 = self.say(f"{cap(names[tgt])} зүүн талаас {ORDT[nl]} байна.")
+        t_l = t + 0.1
+        tl.sound(t_l, SFX_DING)
+        tl.sound(t_l + 0.1, s1)
+        t = t_l + 0.1 + dur(s1) + 0.6
+        t_switch = t
+        h2 = self.say("Одоо баруун талаас тоолъё.")
+        tl.sound(t, SFX_WHOOSH)
+        tl.sound(t + 0.2, h2)
+        t += 0.2 + dur(h2) + 0.3
+        rightst = []
+        for i in range(nr):
+            a = self.ordn(i + 1)
+            tl.sound(t, SFX_TICK)
+            tl.sound(t + 0.05, a)
+            rightst.append(t)
+            t += 0.05 + dur(a) + 0.25
+        s2 = self.say(f"Баруун талаас {ORDT[nr]} байна.")
+        t_r = t + 0.1
+        tl.sound(t_r, SFX_DING)
+        tl.sound(t_r + 0.1, s2)
+        t = t_r + 0.1 + dur(s2)
+        length = t + 1.8 + self.extra
+        ly = cy + size * 0.95
+
+        def draw(fr, d, tt):
+            self._row(d, fr, tt, row, xs, cy, size, ring=tgt)
+            phase_r = tt >= t_switch
+            if not phase_r:
+                for j, st in enumerate(left):
+                    if tt >= st:
+                        ord_label(d, j + 1, xs[j], ly, 28, pop(tt, st, 0.25),
+                                  fill=C_OK if (j == tgt and tt >= t_l) else C_WHITE)
+                draw_text_center(d, "Зүүн талаас", W / 2, 165, 46 * pop(tt, 0.6), (33, 140, 230))
+                paste_emoji(fr, "➡️", W / 2 - 230, 165, 60 * pop(tt, 0.7))
+            else:
+                for j, st in enumerate(rightst):
+                    if tt >= st:
+                        i = k - 1 - j
+                        ord_label(d, j + 1, xs[i], ly, 28, pop(tt, st, 0.25),
+                                  fill=C_OK if (i == tgt and tt >= t_r) else (255, 236, 214))
+                draw_text_center(d, "Баруун талаас", W / 2, 165, 46 * pop(tt, t_switch), (236, 104, 24))
+                paste_emoji(fr, "⬅️", W / 2 + 250, 165, 60 * pop(tt, t_switch + 0.1))
+            # дүн: доор хоёр хавтан
+            if tt >= t_l:
+                draw_text_center(d, "зүүн", W / 2 - 200, 545, 34 * pop(tt, t_l), C_INK)
+                draw_tile(d, f"{nl}-р", W / 2 - 200, 610, 150, 90, scale=pop(tt, t_l), text_size=60, fill=C_OK)
+            if tt >= t_r:
+                draw_text_center(d, "баруун", W / 2 + 200, 545, 34 * pop(tt, t_r), C_INK)
+                draw_tile(d, f"{nr}-р", W / 2 + 200, 610, 150, 90, scale=pop(tt, t_r), text_size=60, fill=C_OK)
+            draw_your_turn(fr, tt, t_r + 0.2 + dur(s2), length)
+        tl.add(length, draw)
+
     # -- угсралт -------------------------------------------------------
     def build(self):
         self.intro()
         for sec in self.cfg["sections"]:
             self.section(sec)
             items = sec["items"]
-            quizzes = [it for it in items if it["type"] in ("howmany", "missing", "expr")
+            quizzes = [it for it in items if it["type"] in ("howmany", "missing", "expr", "which", "find")
                        or (it["type"] in ("add", "sub") and it.get("story"))
                        or (it["type"] == "split" and it.get("quiz"))]
             qi = 0

@@ -156,6 +156,9 @@ def post_text(cfg, lesson_id, youtube_id):
     if cfg.get("type") == "math":
         head = f"{cfg.get('title', '')} {num}-р хичээл: {cfg['topic']}"
         what = cfg.get("summary", "")
+    elif cfg.get("topic") and not cfg.get("new_letters"):   # үсэг үзэхгүй, сэдэвтэй хичээл (бататгал, эх)
+        head = f"{cfg.get('title', '')} {num}-р хичээл: {cfg['topic']}"
+        what = cfg.get("summary", "")
     else:
         new = cfg.get("new_letters", "")
         if cfg.get("review_letters", True):
@@ -235,6 +238,8 @@ def lesson_rows():
     for p in glob.glob(os.path.join(ROOT, "lessons", "**", "*.json"), recursive=True):
         c = M.load_cfg(p)
         if c.get("type") == "math":
+            label = c["topic"]
+        elif c.get("topic") and not c.get("new_letters"):
             label = c["topic"]
         else:
             nl = c.get("new_letters", "")

@@ -46,7 +46,15 @@ NEW_LETTER_SECTION = {"title": "Шинэ үсэг", "emoji": "⭐",
 SECTION_COLORS = {
     "letters": (255, 138, 60), "syllables": (67, 170, 80), "words": (33, 140, 230),
     "sentences": (150, 60, 180), "quiz": (235, 70, 70), "listen": (230, 110, 160),
+    "syltype": (0, 150, 160), "sort": (236, 104, 24), "story": (63, 140, 90), "questions": (150, 60, 180),
 }
+C_OPEN = (67, 170, 80)       # задгай үе
+C_CLOSED = (221, 68, 121)    # битүү үе
+
+
+def is_open(syl):
+    """Задгай үе: эгшгээр төгссөн."""
+    return syl[-1].lower() in VOWELS
 
 
 def reviews(cfg):
@@ -391,6 +399,21 @@ def grid(n, cy, cell, gap, maxrow=10):
     return pos
 
 
+def type_pill(fr, d, open_, cx, cy, scale=1.0):
+    """Үеийн төрөл: 🔓 задгай (ногоон) / 🔒 битүү (ягаан)."""
+    if scale <= 0.05:
+        return
+    text = "задгай" if open_ else "битүү"
+    size = 40 * scale
+    f = font(F_HEAD, size)
+    w = f.getlength(text) + size * 2.6
+    h = size * 1.7
+    d.rounded_rectangle([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2], int(h / 2),
+                        fill=C_OPEN if open_ else C_CLOSED)
+    paste_emoji(fr, "🔓" if open_ else "🔒", cx - w / 2 + size * 1.05, cy, size * 1.15)
+    d.text((cx - w / 2 + size * 1.95, cy), text, font=f, fill=C_WHITE, anchor="lm")
+
+
 def draw_your_turn(fr, t, t0, t1):
     """Хүүхдэд давтах ээлж ирснийг харуулна."""
     if t0 <= t < t1:
@@ -433,6 +456,9 @@ class Lesson:
         tl, cfg = self.tl, self.cfg
         narr = self.say(cfg["intro"])
         shown = self.letters if reviews(cfg) else (self.new or self.letters)
+        topic = cfg.get("topic") if not self.new else None
+        if topic and cfg.get("thumb_tiles"):
+            shown = cfg["thumb_tiles"]
         n = len(shown)
         big = n <= 3   # цөөн үсэг: том харуулна
         t_l, step = 1.3, 0.32
@@ -451,12 +477,14 @@ class Lesson:
             paste_emoji(fr, "📚", W / 2 - 520, 205, 110 * pop(t, 0.4))
             paste_emoji(fr, "✏️", W / 2 + 520, 205, 110 * pop(t, 0.5))
             if num:
-                draw_text_center(d, f"{num}-р хичээл", W / 2, 320, 44 * pop(t, 0.6), C_INK)
+                draw_text_center(d, f"{num}-р хичээл" + (f": {topic}" if topic else ""), W / 2, 320,
+                                 44 * pop(t, 0.6), C_INK)
             for i, ch in enumerate(shown):
                 sc = pop(t, t_l + i * step)
                 x, y = pos[i]
                 if big:
-                    draw_tile(d, ch.upper() + ch, x, y, 260, 210, scale=sc, text_size=130, fill=(255, 244, 196))
+                    draw_tile(d, ch if topic else ch.upper() + ch, x, y, 260, 210, scale=sc, text_size=130,
+                              fill=(255, 244, 196))
                 else:
                     draw_tile(d, ch, x, y, 104, 104, scale=sc, text_size=70,
                               fill=(255, 244, 196) if ch in self.new else C_WHITE)
@@ -642,6 +670,10 @@ class Lesson:
         t_turn = t_word + dur(aw) + 0.1
         size = min(220, (W - 200) / max(1, len(word)) * 1.6)
         cy = 475 if emoji else 380
+        types = self.cfg.get("word_syl_types")
+        if types and len(syl) > 1:
+            size = min(size, 190)
+            cy = 430 if emoji else 360
 
         def draw(fr, d, tt):
             s = pop(tt, 0.05, 0.5)
@@ -654,6 +686,14 @@ class Lesson:
             if tt >= t_word:
                 hl, arcs, col = [(0, len(word))], ranges, C_OK
             draw_word(d, word, W / 2, cy, size * s, hl=hl, hl_color=col, arcs=arcs)
+            if types and len(syl) > 1:   # үе бүрийн доор задгай 🔓 / битүү 🔒
+                f = font(F_TEXT, size * s)
+                x0 = W / 2 - f.getlength(word) / 2
+                for k, (a, b) in enumerate(ranges):
+                    if tt >= steps[k][0] + 0.25:
+                        xc = x0 + f.getlength(word[:a]) + f.getlength(word[a:b]) / 2
+                        sc = pop(tt, steps[k][0] + 0.25, 0.35)
+                        type_pill(fr, d, is_open(syl[k]), xc, cy + size * 0.62 + 40, 0.8 * sc)
             if emoji:
                 paste_emoji(fr, emoji, W / 2, 175, 150 * pop(tt, t_word))
             draw_your_turn(fr, tt, t_turn, length)
@@ -791,6 +831,273 @@ class Lesson:
                 d.ellipse([x - 10, 680 - 10, x + 10, 680 + 10], fill=fill)
         tl.add(length, draw)
 
+    # -- задгай, битүү үе ---------------------------------------------
+    def type_word(self, syl):
+        return self.say("Задгай." if is_open(syl) else "Битүү.")
+
+    def syl_explain(self, syl):
+        """Үеийг уншаад, сүүлийн үсгийг тодруулж, задгай/битүү гэдгийг тайлбарлана."""
+        tl = self.tl
+        op = is_open(syl)
+        a = self.read(cap(syl) + ".")
+        tl.sound(0.05, SFX_POP)
+        tl.sound(0.55, a)
+        t_hl = 0.55 + dur(a) + 0.4
+        tl.sound(t_hl, SFX_POP)
+        ex = self.say("Сүүлийн үсэг нь эгшиг. Энэ бол задгай үе." if op else
+                      "Сүүлийн үсэг нь гийгүүлэгч. Энэ бол битүү үе.")
+        tl.sound(t_hl + 0.2, ex)
+        t_pill = t_hl + 0.2 + dur(ex) * 0.5
+        t_again = t_hl + 0.2 + dur(ex) + 0.4
+        tl.sound(t_again, a)
+        length = t_again + dur(a) + 1.6 + self.extra
+        last = (len(syl) - 1, len(syl))
+
+        def draw(fr, d, tt):
+            s = pop(tt, 0.05, 0.5)
+            hl = [last] if tt >= t_hl else []
+            draw_tile(d, "", W / 2, 320, 420, 250, scale=s)
+            draw_word(d, syl, W / 2, 320, 170 * s, hl=hl, hl_color=(205, 240, 200) if op else (255, 214, 226))
+            if tt >= t_hl:   # сүүлийн үсгийг заах сум
+                f = font(F_TEXT, 170)
+                x = W / 2 - f.getlength(syl) / 2 + f.getlength(syl[:-1]) + f.getlength(syl[-1]) / 2
+                paste_emoji(fr, "⬇️", x, 150, 70 * pop(tt, t_hl))
+            type_pill(fr, d, op, W / 2, 545, pop(tt, t_pill, 0.4))
+            draw_your_turn(fr, tt, t_again + dur(a) + 0.1, length)
+        tl.add(length, draw)
+
+    def syl_pair(self, o, c):
+        """Задгай, битүү хоёр үеийг зэрэгцүүлнэ: са | ас."""
+        tl = self.tl
+        tl.sound(0.05, SFX_POP)
+        t = 0.6
+        marks = []
+        for syl in (o, c):
+            a = self.read(cap(syl) + ".")
+            tl.sound(t, a)
+            t += dur(a) + 0.3
+            tw = self.type_word(syl)
+            tl.sound(t, SFX_POP)
+            tl.sound(t + 0.1, tw)
+            marks.append(t)
+            t += 0.1 + dur(tw) + 0.5
+        length = t + 1.4 + self.extra
+        xs = (W / 2 - 270, W / 2 + 270)
+
+        def draw(fr, d, tt):
+            for k, syl in enumerate((o, c)):
+                op = is_open(syl)
+                on = tt >= marks[k]
+                draw_tile(d, "", xs[k], 330, 380, 240, scale=pop(tt, 0.05 + k * 0.1),
+                          fill=(236, 250, 234) if (on and op) else (255, 236, 242) if on else C_WHITE)
+                draw_word(d, syl, xs[k], 330, 160 * pop(tt, 0.05 + k * 0.1),
+                          hl=[(len(syl) - 1, len(syl))] if on else [],
+                          hl_color=(205, 240, 200) if op else (255, 214, 226))
+                type_pill(fr, d, op, xs[k], 540, pop(tt, marks[k], 0.4))
+            draw_text_center(d, "|", W / 2, 330, 120 * pop(tt, 0.2), C_GRAY)
+            draw_your_turn(fr, tt, marks[-1] + 0.6, length)
+        tl.add(length, draw)
+
+    def syl_sort(self, syl, idx, n):
+        """Асуулт: энэ үе задгай уу, битүү юу? 3 хүртэл хүлээгээд хариулна."""
+        tl = self.tl
+        op = is_open(syl)
+        a = self.read(cap(syl) + ".")
+        tl.sound(0.05, SFX_POP)
+        tl.sound(0.5, a)
+        t0 = 0.5 + dur(a) + 0.4
+        for k in range(3):
+            tl.sound(t0 + k, SFX_TICK)
+        t_rev = t0 + 3
+        tw = self.type_word(syl)
+        tl.sound(t_rev, SFX_DING)
+        tl.sound(t_rev + 0.15, tw)
+        length = t_rev + 0.15 + dur(tw) + 1.3 + self.extra / 2
+        opts = ((True, W / 2 - 230), (False, W / 2 + 230))
+
+        def draw(fr, d, tt):
+            s = pop(tt, 0.05, 0.5)
+            ok = tt >= t_rev
+            draw_tile(d, "", W / 2, 290, 400, 230, scale=s, fill=C_OK if ok else C_WHITE)
+            draw_word(d, syl, W / 2, 290, 160 * s, hl=[(len(syl) - 1, len(syl))] if ok else [],
+                      hl_color=(205, 240, 200) if op else (255, 214, 226))
+            for o_, x in opts:
+                right = o_ == op
+                sc = pop(tt, 0.4) * (1.12 if ok and right else 0.88 if ok else 1)
+                if ok and not right:
+                    sc *= 0.9
+                type_pill(fr, d, o_, x, 545, sc)
+                if ok and right:
+                    paste_emoji(fr, "⭐", x + 150, 505, 70 * pop(tt, t_rev))
+            if not ok and tt >= t0:
+                k = tt - t0
+                num, frac = 3 - int(k), k - int(k)
+                cx, cy, r = W - 120, 600, 50
+                d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=C_WHITE, outline=(230, 230, 235), width=8)
+                d.arc([cx - r, cy - r, cx + r, cy + r], -90, -90 + 360 * frac, fill=(235, 70, 70), width=8)
+                draw_text_center(d, str(num), cx, cy, 54 * (1 + 0.25 * max(0, 1 - frac * 4)), (235, 70, 70))
+            for j in range(n):
+                x = W / 2 + (j - (n - 1) / 2) * 34
+                fill = (235, 70, 70) if j < idx or (j == idx and ok) else (225, 225, 232)
+                d.ellipse([x - 10, 680 - 10, x + 10, 680 + 10], fill=fill)
+        tl.add(length, draw)
+
+    # -- өгүүллэг (эх уншлага) ------------------------------------------
+    def story_layout(self, story, size=74):
+        """Өгүүллэгийн бүх үгийг мөрөнд хуваарилна: [(текст, өгүүлбэрийн №, x төв, y)]."""
+        f = font(F_TEXT, size)
+        sp = f.getlength(" ") * 1.3
+        maxw = W - 220
+        lines, cur, wsum = [], [], 0
+        for k, sd in enumerate(story["sentences"]):   # өгүүлбэрийг аль болох нэг мөрөнд багтаана
+            words = [(tk, k, f.getlength(tk)) for tk in sd["s"].split(" ")]
+            sw = sum(w for *_, w in words) + sp * (len(words) - 1)
+            if cur and wsum + sp + sw > maxw:
+                lines.append(cur)
+                cur, wsum = [], 0
+            for tk, kk, w in words:
+                if cur and wsum + sp + w > maxw:
+                    lines.append(cur)
+                    cur, wsum = [], 0
+                wsum += (sp if cur else 0) + w
+                cur.append((tk, kk, w))
+        if cur:
+            lines.append(cur)
+        lh = size * 1.5
+        y0 = 440 - (len(lines) - 1) * lh / 2
+        out = []
+        for li, ln in enumerate(lines):
+            total = sum(w for *_, w in ln) + sp * (len(ln) - 1)
+            x = W / 2 - total / 2
+            for tk, k, w in ln:
+                out.append((tk, k, x + w / 2, y0 + li * lh))
+                x += w + sp
+        return out, size
+
+    def draw_story(self, fr, d, story, lay, size, cur_sent, cur_word=None, done=(), green=()):
+        """cur_sent: одоо уншиж буй өгүүлбэр (бусад нь бүдэг эсвэл энгийн). cur_word: тухайн өгүүлбэрийн үгийн №."""
+        counts = {}
+        for tk, k, x, y in lay:
+            wi = counts.get(k, 0)
+            counts[k] = wi + 1
+            c = tk.strip(",.!?")
+            st = tk.find(c)
+            hl, col = [], C_HL
+            if k in green:
+                hl, col = [(st, st + len(c))], C_OK
+            elif k == cur_sent and cur_word == wi:
+                hl = [(st, st + len(c))]
+            colors = None if (k == cur_sent or k in done or k in green) else [C_DIM] * len(tk)
+            draw_word(d, tk, x, y, size, hl=hl, hl_color=col, ref="Ам", char_colors=colors)
+
+    def story_title(self, story):
+        tl = self.tl
+        a = self.read(story["title"] + ".")
+        tl.sound(0.1, SFX_WHOOSH)
+        tl.sound(0.8, a)
+        t_again = 0.8 + dur(a) + 0.5
+        length = t_again + 1.8 + self.extra
+
+        def draw(fr, d, tt):
+            paste_emoji(fr, story.get("emoji", "📖"), W / 2, 230, 200 * pop(tt, 0.2, 0.6))
+            hl = [(0, len(story["title"]))] if 0.8 <= tt < 0.8 + dur(a) + 0.2 else []
+            draw_word(d, story["title"], W / 2, 470, 130 * pop(tt, 0.4, 0.5), hl=hl, ref="Ам")
+            draw_your_turn(fr, tt, t_again, length)
+        tl.add(length, draw)
+
+    def story_sentence(self, story, k, lay, size):
+        """Өгүүлбэрийг үг үгээр, дараа нь бүтнээр уншина. Бусад өгүүлбэр дэлгэц дээр харагдана."""
+        tl = self.tl
+        sd = story["sentences"][k]
+        toks = sd["s"].split(" ")
+        t = 0.6
+        steps = []
+        for i, tk in enumerate(toks):
+            a = self.read(cap(tk.strip(",.!?")) + ".")
+            tl.sound(t, a)
+            steps.append((t, t + dur(a) + 0.25, i))
+            t += dur(a) + 0.4
+        t += 0.2
+        t_full = t
+        af = self.read(sd["s"])
+        tl.sound(t_full, af)
+        tl.sound(t_full, SFX_POP)
+        t = t_full + dur(af)
+        length = t + 2.0 + self.extra
+
+        def draw(fr, d, tt):
+            cw = next((i for st, en, i in steps if st <= tt < en), None)
+            green = (k,) if tt >= t_full else ()
+            self.draw_story(fr, d, story, lay, size, k, cw, done=range(k), green=green)
+            paste_emoji(fr, sd.get("emoji"), W / 2, 150, 100 * pop(tt, 0.1))
+            draw_your_turn(fr, tt, t_full + dur(af) + 0.1, length)
+        tl.add(length, draw)
+
+    def story_full(self, story, lay, size):
+        """Өгүүллэгийг эхнээс нь бүтнээр уншина."""
+        tl = self.tl
+        intro = self.say("Одоо бүтнээр нь уншъя.")
+        tl.sound(0.3, intro)
+        t = 0.3 + dur(intro) + 0.4
+        spans = []
+        for sd in story["sentences"]:
+            af = self.read(sd["s"])
+            tl.sound(t, af)
+            spans.append((t, t + dur(af) + 0.3))
+            t += dur(af) + 0.55
+        length = t + 1.6 + self.extra
+        n = len(story["sentences"])
+
+        def draw(fr, d, tt):
+            cur = next((k for k, (st, en) in enumerate(spans) if st <= tt < en), None)
+            done = range(n) if tt >= spans[-1][1] else range(cur or 0)
+            self.draw_story(fr, d, story, lay, size, cur, None, done=done,
+                            green=(cur,) if cur is not None else ())
+            e = story["sentences"][cur]["emoji"] if cur is not None else story.get("emoji")
+            paste_emoji(fr, e, W / 2, 150, 100)
+        tl.add(length, draw)
+
+    def question(self, q, idx, n):
+        """Өгүүллэгийн агуулгаар асуулт: 3 зургаас зөвийг олно."""
+        tl = self.tl
+        a = self.say(q["q"])
+        tl.sound(0.05, SFX_POP)
+        tl.sound(0.5, a)
+        t0 = 0.5 + dur(a) + 0.4
+        for k in range(3):
+            tl.sound(t0 + k, SFX_TICK)
+        t_rev = t0 + 3
+        ans = self.say(q["a"])
+        tl.sound(t_rev, SFX_DING)
+        tl.sound(t_rev + 0.15, ans)
+        length = t_rev + 0.15 + dur(ans) + 1.4 + self.extra / 2
+        opts = q["options"]
+        xs = [W / 2 + (i - (len(opts) - 1) / 2) * 300 for i in range(len(opts))]
+
+        def draw(fr, d, tt):
+            ok = tt >= t_rev
+            paste_emoji(fr, "🤔", W / 2, 165, 110 * pop(tt, 0.1))
+            for i, e in enumerate(opts):
+                right = i == q["answer"]
+                sc = pop(tt, 0.3 + i * 0.1) * (1.08 if ok and right else 0.85 if ok else 1)
+                draw_tile(d, "", xs[i], 400, 240, 240, scale=sc,
+                          fill=C_OK if ok and right else (244, 244, 246) if ok else C_WHITE)
+                paste_emoji(fr, e, xs[i], 400, 160 * sc)
+                if ok and right:
+                    paste_emoji(fr, "⭐", xs[i] + 110, 290, 76 * pop(tt, t_rev))
+            if not ok and tt >= t0:
+                k = tt - t0
+                num, frac = 3 - int(k), k - int(k)
+                cx, cy, r = W - 120, 600, 50
+                d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=C_WHITE, outline=(230, 230, 235), width=8)
+                d.arc([cx - r, cy - r, cx + r, cy + r], -90, -90 + 360 * frac, fill=(235, 70, 70), width=8)
+                draw_text_center(d, str(num), cx, cy, 54 * (1 + 0.25 * max(0, 1 - frac * 4)), (235, 70, 70))
+            for j in range(n):
+                x = W / 2 + (j - (n - 1) / 2) * 34
+                fill = (235, 70, 70) if j < idx or (j == idx and ok) else (225, 225, 232)
+                d.ellipse([x - 10, 680 - 10, x + 10, 680 + 10], fill=fill)
+        tl.add(length, draw)
+
     def outro(self):
         tl, cfg = self.tl, self.cfg
         self.chapters.append((tl.t, "Төгсгөл"))
@@ -814,20 +1121,33 @@ class Lesson:
     def build(self):
         cfg = self.cfg
         self.intro()
-        self.section("letters")
-        for ch in (self.letters if reviews(cfg) else [c for c in self.letters if c in self.new]):
-            self.letter(ch)
+        shown = self.letters if reviews(cfg) else [c for c in self.letters if c in self.new]
+        if shown:
+            self.section("letters")
+            for ch in shown:
+                self.letter(ch)
         if cfg.get("listen_words"):
             self.section("listen")
             for w in cfg["listen_words"]:
                 self.listen_word(w)
-        groups = self.syllable_groups()
+        groups = self.syllable_groups() if cfg.get("show_syllables", True) else []
         if groups:
             self.section("syllables")
             for g in groups:
                 for i, s in enumerate(g):
                     self.syllable(s, g, i)
                 self.syllable_row(g)
+        st = cfg.get("syl_types")
+        if st:
+            self.section("syltype")
+            for s in st.get("explain", []):
+                self.syl_explain(s)
+            for o, c in st.get("pairs", []):
+                self.syl_pair(o, c)
+            if st.get("sort"):
+                self.section("sort")
+                for i, s in enumerate(st["sort"]):
+                    self.syl_sort(s, i, len(st["sort"]))
         if cfg.get("words"):
             self.section("words")
             for w in cfg["words"]:
@@ -836,6 +1156,18 @@ class Lesson:
             self.section("sentences")
             for s in cfg["sentences"]:
                 self.sentence(s)
+        story = cfg.get("story")
+        if story:
+            self.section("story")
+            lay, size = self.story_layout(story)
+            self.story_title(story)
+            for k in range(len(story["sentences"])):
+                self.story_sentence(story, k, lay, size)
+            self.story_full(story, lay, size)
+        if cfg.get("questions"):
+            self.section("questions")
+            for i, q in enumerate(cfg["questions"]):
+                self.question(q, i, len(cfg["questions"]))
         if cfg.get("quiz"):
             self.section("quiz")
             for i, w in enumerate(cfg["quiz"]):
@@ -908,6 +1240,10 @@ def validate(cfg):
     bad = []
     items = [w["w"] for w in cfg.get("words", [])] + [s["s"] for s in cfg.get("sentences", [])] + cfg.get("quiz", [])
     items += [i.get("example", "") for i in cfg.get("letter_info", {}).values() if not i.get("listen")]
+    story = cfg.get("story") or {}
+    items += [story.get("title", "")] + [sd["s"] for sd in story.get("sentences", [])]
+    st = cfg.get("syl_types") or {}
+    items += st.get("explain", []) + [x for p in st.get("pairs", []) for x in p] + st.get("sort", [])
     for it in items:
         extra = {c for c in it.lower() if c.isalpha() and c not in ok}
         if extra:
@@ -1056,7 +1392,11 @@ def make_thumbnail(cfg, bg, path):
     draw_text_center(d, cfg.get("title", "Уншиж сурцгаая!"), W / 2, 205, 96, (255, 112, 40),
                      stroke=10, stroke_fill=C_WHITE)
     letters, new = overlay_tokens(cfg)
-    if cfg.get("type") != "math" and not reviews(cfg) and new:
+    tiles = cfg.get("thumb_tiles") if cfg.get("type") != "math" and not new else None
+    if tiles:
+        for i, (x, y) in enumerate(grid(len(tiles), 372, 300, 30)):
+            draw_tile(d, tiles[i], x, y, 300, 230, text_size=150, fill=(255, 238, 160))
+    elif cfg.get("type") != "math" and not reviews(cfg) and new:
         for i, (x, y) in enumerate(grid(len(new), 372, 300, 30)):
             draw_tile(d, new[i].upper() + new[i], x, y, 300, 230, text_size=165, fill=(255, 238, 160))
     else:
@@ -1157,16 +1497,20 @@ def reading_youtube(cfg, chap):
     title = f"Уншиж сурцгаая! {num}-р хичээл: {letters} үсэг | {grade}-р анги | {BRAND}"
     if not reviews(cfg):
         title = f"Уншиж сурцгаая! {num}-р хичээл: {new.upper()} үсэг | {grade}-р анги | {BRAND}"
+    topic = cfg.get("topic") if not cfg.get("new_letters") else None
+    if topic:
+        title = f"Уншиж сурцгаая! {num}-р хичээл: {topic} | {grade}-р анги | {BRAND}"
     if len(title) > 100:  # YouTube-ийн хязгаар: үсэг олон болоход зөвхөн шинэ үсгээ бичнэ
         title = f"Уншиж сурцгаая! {num}-р хичээл: шинэ үсэг {new.upper()} | {grade}-р анги | {BRAND}"
     desc = "\n".join([
         DESC_TOP,
         "",
         f"{BRAND}: {grade}-р ангийн хүүхдэд зориулсан уншлагын хичээл.",
-        (f"{new.upper()} үсэгтэй танилцаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") and not reviews(cfg) else
+        (cfg.get("summary", "") if topic else
+         f"{new.upper()} үсэгтэй танилцаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") and not reviews(cfg) else
          f"Үзсэн үсгүүдээ ({letters}) давтаж, үе холбож, үг, өгүүлбэр уншина." if cfg.get("words") else
          f"{new.upper()} үсэгтэй танилцаж, сонссон үгэн дотроос нь олж сурна."),
-        f"Шинэ үсэг: {new}",
+        f"Үзсэн үсгүүд: {letters}" if topic else f"Шинэ үсэг: {new}",
         "",
         "Дэлгэцийн буланд 🗣️ тэмдэг гарахад хүүхэд чангаар давтаж хэлээрэй.",
         "",
@@ -1181,7 +1525,8 @@ def reading_youtube(cfg, chap):
     ])
     tags = (f"{BRAND.lower()}, уншлага, уншиж сурах, цагаан толгой, монгол хэл, 1-р анги, нэгдүгээр анги, "
             "бага анги, үсэг, үе холбох, хүүхдэд, хичээл, "
-            + ", ".join(cfg["letters"] if reviews(cfg) else cfg.get("new_letters", "")) + " үсэг")
+            + (cfg.get("tags", topic) if topic else
+               ", ".join(cfg["letters"] if reviews(cfg) else cfg.get("new_letters", "")) + " үсэг"))
     return title, desc, tags
     print("Thumbnail:", thumb)
 

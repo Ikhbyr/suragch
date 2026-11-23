@@ -1956,7 +1956,7 @@ window.LESSONS = [
    "=": "audio/8347b987d02ee978.mp3"
   },
   "poster": "img/1-math-hicheel_13.png",
-  "added": 1795154199
+  "added": 1795154248
  },
  {
   "id": "hicheel_01",
@@ -4492,6 +4492,493 @@ window.LESSONS = [
    }
   ],
   "poster": "img/hicheel_10.png",
-  "added": 1795154234
+  "added": 1795154248
+ },
+ {
+  "id": "hicheel_11",
+  "subject": "mongol",
+  "type": "reading",
+  "grade": 1,
+  "number": 11,
+  "title": "Уншиж сурцгаая!",
+  "letters": "аэийымсрх",
+  "new": "",
+  "youtube_id": "5Nuw9bAtaT4",
+  "video": "",
+  "topic": "Эх уншъя: Сар",
+  "glyph": "Сар",
+  "letter_cards": [
+   {
+    "ch": "а",
+    "a": "audio/f13d5c82a872b135.mp3"
+   },
+   {
+    "ch": "э",
+    "a": "audio/edde55db571d52c4.mp3"
+   },
+   {
+    "ch": "и",
+    "a": "audio/8cc7099d94e374f5.mp3"
+   },
+   {
+    "ch": "й",
+    "a": "audio/4205a9cab226b607.mp3"
+   },
+   {
+    "ch": "ы",
+    "a": "audio/80ac3b5601d000c4.mp3"
+   },
+   {
+    "ch": "м",
+    "a": "audio/1f359312b8b20b1b.mp3"
+   },
+   {
+    "ch": "с",
+    "a": "audio/1fa289254a71a306.mp3"
+   },
+   {
+    "ch": "р",
+    "a": "audio/8b2046343c376507.mp3"
+   },
+   {
+    "ch": "х",
+    "a": "audio/e0be8c3a8966e8e8.mp3"
+   }
+  ],
+  "syllables": [
+   [
+    {
+     "t": "ма",
+     "a": "audio/6345d1cb358d7bd0.mp3"
+    },
+    {
+     "t": "мэ",
+     "a": "audio/fe4e41ae103a6cd7.mp3"
+    },
+    {
+     "t": "ми",
+     "a": "audio/866cefde8ce9e9fe.mp3"
+    },
+    {
+     "t": "мы",
+     "a": "audio/8fc5214947a914fa.mp3"
+    }
+   ],
+   [
+    {
+     "t": "са",
+     "a": "audio/4d2056f6ec280826.mp3"
+    },
+    {
+     "t": "сэ",
+     "a": "audio/c2e888a3441d2292.mp3"
+    },
+    {
+     "t": "си",
+     "a": "audio/db9f57292e60104a.mp3"
+    },
+    {
+     "t": "сы",
+     "a": "audio/5b2f44ab4a82671a.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ра",
+     "a": "audio/c57b1e581cd4f092.mp3"
+    },
+    {
+     "t": "рэ",
+     "a": "audio/9b6d9acbea09271f.mp3"
+    },
+    {
+     "t": "ри",
+     "a": "audio/17a5bc59394e50a0.mp3"
+    },
+    {
+     "t": "ры",
+     "a": "audio/16af1715a7ff8e86.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ха",
+     "a": "audio/da249a898bed6ad5.mp3"
+    },
+    {
+     "t": "хэ",
+     "a": "audio/2fc6ca2a57f34295.mp3"
+    },
+    {
+     "t": "хи",
+     "a": "audio/9c48bc49d7f1b593.mp3"
+    },
+    {
+     "t": "хы",
+     "a": "audio/8a22b991ca7b55f5.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ам",
+     "a": "audio/b008a176d33c90ce.mp3"
+    },
+    {
+     "t": "эм",
+     "a": "audio/9c1e73d29e1115b0.mp3"
+    },
+    {
+     "t": "им",
+     "a": "audio/ce0774e47f090e42.mp3"
+    },
+    {
+     "t": "ым",
+     "a": "audio/0b9a3bd4d26a8d23.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ас",
+     "a": "audio/3ed2c66e286f3551.mp3"
+    },
+    {
+     "t": "эс",
+     "a": "audio/fcba2bd36fac4f32.mp3"
+    },
+    {
+     "t": "ис",
+     "a": "audio/d69bc7df396f7126.mp3"
+    },
+    {
+     "t": "ыс",
+     "a": "audio/726d7c4bb0df694b.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ар",
+     "a": "audio/ab1e0e5f991a2e72.mp3"
+    },
+    {
+     "t": "эр",
+     "a": "audio/4d16046662433bb1.mp3"
+    },
+    {
+     "t": "ир",
+     "a": "audio/92d9ab5c460f655b.mp3"
+    },
+    {
+     "t": "ыр",
+     "a": "audio/19c3ac0fe5b3baaa.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ах",
+     "a": "audio/9af1980ae8a85fdb.mp3"
+    },
+    {
+     "t": "эх",
+     "a": "audio/6b8ecad5ec191f74.mp3"
+    },
+    {
+     "t": "их",
+     "a": "audio/9ddfa7ee135296ad.mp3"
+    },
+    {
+     "t": "ых",
+     "a": "audio/c5374d5628702e71.mp3"
+    }
+   ],
+   [
+    {
+     "t": "ай",
+     "a": "audio/4c676ac8002ac24d.mp3"
+    },
+    {
+     "t": "эй",
+     "a": "audio/4bb3d5e3ae10648b.mp3"
+    },
+    {
+     "t": "ий",
+     "a": "audio/92cd4ced9eb3179c.mp3"
+    },
+    {
+     "t": "ый",
+     "a": "audio/fb8b2bf761d5e6ac.mp3"
+    }
+   ]
+  ],
+  "words": [
+   {
+    "w": "сар",
+    "a": "audio/10a548bb0fc64264.mp3",
+    "emoji": "🌙",
+    "syl": [
+     {
+      "t": "сар"
+     }
+    ]
+   },
+   {
+    "w": "хар",
+    "a": "audio/4e3eb35367fb9add.mp3",
+    "emoji": "⚫",
+    "syl": [
+     {
+      "t": "хар"
+     }
+    ]
+   },
+   {
+    "w": "Сараа",
+    "a": "audio/3bac710e9df8f4d0.mp3",
+    "emoji": "👧",
+    "syl": [
+     {
+      "t": "Са",
+      "a": "audio/4d2056f6ec280826.mp3"
+     },
+     {
+      "t": "раа",
+      "a": "audio/5fa669203d1145db.mp3"
+     }
+    ]
+   },
+   {
+    "w": "Амар",
+    "a": "audio/39e0971a44f859ea.mp3",
+    "emoji": "👦",
+    "syl": [
+     {
+      "t": "А",
+      "a": "audio/3c0ef64aecd4ae58.mp3"
+     },
+     {
+      "t": "мар",
+      "a": "audio/5a9651ed5c24dd25.mp3"
+     }
+    ]
+   },
+   {
+    "w": "ихэр",
+    "a": "audio/a06d990525877504.mp3",
+    "emoji": "👧👦",
+    "syl": [
+     {
+      "t": "и",
+      "a": "audio/791ea6bea670a1dc.mp3"
+     },
+     {
+      "t": "хэр",
+      "a": "audio/2e7f628794805039.mp3"
+     }
+    ],
+    "explain": "Ихэр гэдэг нь нэг өдөр төрсөн ах дүүс.",
+    "xa": "audio/a3a74cd34bfa3447.mp3"
+   },
+   {
+    "w": "эмээ",
+    "a": "audio/75c5050bc06a9df9.mp3",
+    "emoji": "👵",
+    "syl": [
+     {
+      "t": "э",
+      "a": "audio/3292c8498b48d9c9.mp3"
+     },
+     {
+      "t": "мээ",
+      "a": "audio/fa656b1f85a24181.mp3"
+     }
+    ]
+   }
+  ],
+  "sentences": [
+   {
+    "s": "Сараа, Амар ихэр.",
+    "a": "audio/7af1e883b3de6b0c.mp3",
+    "emoji": "👧👦",
+    "story": true,
+    "words": [
+     {
+      "t": "Сараа,",
+      "a": "audio/3bac710e9df8f4d0.mp3"
+     },
+     {
+      "t": "Амар",
+      "a": "audio/39e0971a44f859ea.mp3"
+     },
+     {
+      "t": "ихэр.",
+      "a": "audio/a06d990525877504.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Сараа: Ахаа, хар!",
+    "a": "audio/5ad4720f6b835b9c.mp3",
+    "emoji": "👧",
+    "story": true,
+    "words": [
+     {
+      "t": "Сараа:",
+      "a": "audio/3bac710e9df8f4d0.mp3"
+     },
+     {
+      "t": "Ахаа,",
+      "a": "audio/4ed90baaec2aad28.mp3"
+     },
+     {
+      "t": "хар!",
+      "a": "audio/4e3eb35367fb9add.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Ийм их сар!",
+    "a": "audio/32e3139696b5b872.mp3",
+    "emoji": "🌙",
+    "story": true,
+    "words": [
+     {
+      "t": "Ийм",
+      "a": "audio/2426b21c9d753dae.mp3"
+     },
+     {
+      "t": "их",
+      "a": "audio/9ddfa7ee135296ad.mp3"
+     },
+     {
+      "t": "сар!",
+      "a": "audio/10a548bb0fc64264.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Амар: Ийм их од!",
+    "a": "audio/ba4eff0ff0ada4fe.mp3",
+    "emoji": "✨",
+    "story": true,
+    "words": [
+     {
+      "t": "Амар:",
+      "a": "audio/39e0971a44f859ea.mp3"
+     },
+     {
+      "t": "Ийм",
+      "a": "audio/2426b21c9d753dae.mp3"
+     },
+     {
+      "t": "их",
+      "a": "audio/9ddfa7ee135296ad.mp3"
+     },
+     {
+      "t": "⭐!",
+      "a": "audio/ee4f61f8753afa76.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Эмээ: Сараа, Амар, ир!",
+    "a": "audio/72830b7315410323.mp3",
+    "emoji": "👵",
+    "story": true,
+    "words": [
+     {
+      "t": "Эмээ:",
+      "a": "audio/75c5050bc06a9df9.mp3"
+     },
+     {
+      "t": "Сараа,",
+      "a": "audio/3bac710e9df8f4d0.mp3"
+     },
+     {
+      "t": "Амар,",
+      "a": "audio/39e0971a44f859ea.mp3"
+     },
+     {
+      "t": "ир!",
+      "a": "audio/92d9ab5c460f655b.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Ийм их бууз!",
+    "a": "audio/e0c0856428417cf9.mp3",
+    "emoji": "🥟",
+    "story": true,
+    "words": [
+     {
+      "t": "Ийм",
+      "a": "audio/2426b21c9d753dae.mp3"
+     },
+     {
+      "t": "их",
+      "a": "audio/9ddfa7ee135296ad.mp3"
+     },
+     {
+      "t": "🥟!",
+      "a": "audio/0941a73c8e228c5d.mp3"
+     }
+    ]
+   },
+   {
+    "s": "Сараа, Амар: Ммм!",
+    "a": "audio/b0cddb6f6a10914c.mp3",
+    "emoji": "😋",
+    "story": true,
+    "words": [
+     {
+      "t": "Сараа,",
+      "a": "audio/3bac710e9df8f4d0.mp3"
+     },
+     {
+      "t": "Амар:",
+      "a": "audio/39e0971a44f859ea.mp3"
+     },
+     {
+      "t": "Ммм!",
+      "a": "audio/f524b4da22029fb7.mp3"
+     }
+    ]
+   }
+  ],
+  "listen": [],
+  "story_title": "Сар",
+  "story_emoji": "🌙",
+  "game": [
+   {
+    "w": "сар",
+    "a": "audio/10a548bb0fc64264.mp3",
+    "emoji": "🌙"
+   },
+   {
+    "w": "хар",
+    "a": "audio/4e3eb35367fb9add.mp3",
+    "emoji": "⚫"
+   },
+   {
+    "w": "Сараа",
+    "a": "audio/3bac710e9df8f4d0.mp3",
+    "emoji": "👧"
+   },
+   {
+    "w": "Амар",
+    "a": "audio/39e0971a44f859ea.mp3",
+    "emoji": "👦"
+   },
+   {
+    "w": "ихэр",
+    "a": "audio/a06d990525877504.mp3",
+    "emoji": "👧👦"
+   },
+   {
+    "w": "эмээ",
+    "a": "audio/75c5050bc06a9df9.mp3",
+    "emoji": "👵"
+   }
+  ],
+  "poster": "img/hicheel_11.png",
+  "added": 1795436358
  }
 ];

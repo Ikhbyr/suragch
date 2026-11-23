@@ -10,7 +10,7 @@
 "words", "sentences", "quiz" хэсгийг шинэчилнэ. Уншуулах үг, өгүүлбэр нь зөвхөн
 үзсэн үсгүүдээс бүрдэх ёстой - скрипт үүнийг шалгана.
 """
-import sys, os, json, asyncio, hashlib, subprocess, math, random, wave, bisect
+import sys, os, json, asyncio, hashlib, subprocess, math, random, wave, bisect, re, difflib
 from functools import lru_cache
 
 import numpy as np
@@ -47,9 +47,62 @@ SECTION_COLORS = {
     "letters": (255, 138, 60), "syllables": (67, 170, 80), "words": (33, 140, 230),
     "sentences": (150, 60, 180), "quiz": (235, 70, 70), "listen": (230, 110, 160),
     "syltype": (0, 150, 160), "sort": (236, 104, 24), "story": (63, 140, 90), "questions": (150, 60, 180),
+    "characters": (230, 110, 160), "magic": (142, 58, 172), "chant": (236, 104, 24),
 }
 C_OPEN = (67, 170, 80)       # задгай үе
 C_CLOSED = (221, 68, 121)    # битүү үе
+
+
+REBUS = re.compile(r"\{([^:}]+):([^}]+)\}")
+
+
+def rebus(tk):
+    """"{од:⭐}!" -> ("од", "⭐", "!"). Зурган үг биш бол None."""
+    m = REBUS.match(tk)
+    return (m.group(1), m.group(2), tk[m.end():]) if m else None
+
+
+def plain(text):
+    """Зурган үгийг унших үгээр нь солино: "Ийм их {од:⭐}!" -> "Ийм их од!"."""
+    return REBUS.sub(lambda m: m.group(1), text)
+
+
+CHANT_BPM = 100                  # арын аятай ижил хурд (make_music bpm=100), хэмжээ нь давхцана
+CHANT_BEAT = 60.0 / CHANT_BPM
+CHANT_BAR = 4 * CHANT_BEAT
+
+
+def drum_loop(bars, amp=0.24):
+    """Хэмнэлийн бөмбөр: зөвхөн цохилт (kick, алга ташилт, шажигнуур), аялгуугүй тул арын аятай зөрчилдөхгүй."""
+    n = int((bars * CHANT_BAR + 0.5) * SR)
+    out = np.zeros(n, np.float32)
+    rng = np.random.default_rng(3)
+
+    def add(t0, sig, a):
+        i = int(t0 * SR)
+        j = min(n, i + len(sig))
+        if i < n:
+            out[i:j] += a * sig[:j - i]
+
+    t = _t(0.28)
+    kick = (np.sin(2 * np.pi * np.cumsum(48 + 95 * np.exp(-t * 28)) / SR) * np.exp(-t * 11)).astype(np.float32)
+    t = _t(0.16)
+    noise = np.diff(rng.normal(size=len(t) + 1)).astype(np.float32)
+    clap = noise * (np.exp(-t * 32) + 0.6 * np.exp(-np.maximum(0, t - 0.012) * 45) * (t > 0.012))
+    clap /= float(np.max(np.abs(clap))) or 1.0
+    t = _t(0.045)
+    hat = np.diff(np.diff(rng.normal(size=len(t) + 2))).astype(np.float32) * np.exp(-t * 95)
+    hat /= float(np.max(np.abs(hat))) or 1.0
+    for b in range(bars):
+        t0 = b * CHANT_BAR
+        add(t0, kick, 1.0)
+        add(t0 + 2 * CHANT_BEAT, kick, 0.85)
+        add(t0 + CHANT_BEAT, clap, 0.45)
+        add(t0 + 3 * CHANT_BEAT, clap, 0.45)
+        for e in range(8):
+            add(t0 + e * CHANT_BEAT / 2, hat, 0.16 if e % 2 else 0.08)
+    out /= float(np.max(np.abs(out))) or 1.0
+    return out * amp
 
 
 def is_open(syl):
@@ -943,6 +996,29 @@ class Lesson:
         tl.add(length, draw)
 
     # -- өгүүллэг (эх уншлага) ------------------------------------------
+    def story_pages(self, story, size=74, max_lines=4):
+        """Урт өгүүллэгийг хуудсанд хуваана: хуудас бүр max_lines мөрөөс илүүгүй, өгүүлбэр тасрахгүй.
+        Буцаах: ([(хуудасны layout, size)], өгүүлбэр -> хуудасны №)."""
+        sents = story["sentences"]
+        pages, cur = [], []
+        for k in range(len(sents)):
+            trial = {"sentences": [sents[i] for i in cur + [k]]}
+            lay, _ = self.story_layout(trial, size)
+            nlines = len({y for *_, y in lay})
+            if cur and nlines > max_lines:
+                pages.append(cur)
+                cur = []
+            cur.append(k)
+        pages.append(cur)
+        out, where = [], {}
+        for pi, ks in enumerate(pages):
+            lay, sz = self.story_layout({"sentences": [sents[k] for k in ks]}, size)
+            lay = [(tk, ks[k], x, y) for tk, k, x, y in lay]   # жинхэнэ өгүүлбэрийн № руу буцаана
+            out.append((lay, sz))
+            for k in ks:
+                where[k] = pi
+        return out, where
+
     def story_layout(self, story, size=74):
         """Өгүүллэгийн бүх үгийг мөрөнд хуваарилна: [(текст, өгүүлбэрийн №, x төв, y)]."""
         f = font(F_TEXT, size)
@@ -950,7 +1026,7 @@ class Lesson:
         maxw = W - 220
         lines, cur, wsum = [], [], 0
         for k, sd in enumerate(story["sentences"]):   # өгүүлбэрийг аль болох нэг мөрөнд багтаана
-            words = [(tk, k, f.getlength(tk)) for tk in sd["s"].split(" ")]
+            words = [(tk, k, self.tok_width(tk, size)) for tk in sd["s"].split(" ")]
             sw = sum(w for *_, w in words) + sp * (len(words) - 1)
             if cur and wsum + sp + sw > maxw:
                 lines.append(cur)
@@ -974,13 +1050,34 @@ class Lesson:
                 x += w + sp
         return out, size
 
+    @staticmethod
+    def tok_width(tk, size):
+        rb = rebus(tk)
+        if rb:
+            return size * 1.25 + (font(F_TEXT, size).getlength(rb[2]) if rb[2] else 0)
+        return font(F_TEXT, size).getlength(tk)
+
     def draw_story(self, fr, d, story, lay, size, cur_sent, cur_word=None, done=(), green=()):
         """cur_sent: одоо уншиж буй өгүүлбэр (бусад нь бүдэг эсвэл энгийн). cur_word: тухайн өгүүлбэрийн үгийн №."""
         counts = {}
         for tk, k, x, y in lay:
             wi = counts.get(k, 0)
             counts[k] = wi + 1
-            c = tk.strip(",.!?")
+            rb = rebus(tk)
+            if rb:   # зурган үг: дүрс + цэг тэмдэг
+                w = self.tok_width(tk, size)
+                x0 = x - w / 2
+                on = k in green or (k == cur_sent and cur_word == wi)
+                if on:
+                    d.rounded_rectangle([x0 - 6, y - size * 0.62, x0 + size * 1.25 + 6, y + size * 0.62],
+                                        int(size * 0.18), fill=C_OK if k in green else C_HL)
+                dim = not (k == cur_sent or k in done or k in green)
+                paste_emoji(fr, rb[1], x0 + size * 0.62, y, size * (0.75 if dim else 1.0))
+                if rb[2]:
+                    draw_word(d, rb[2], x0 + size * 1.25 + font(F_TEXT, size).getlength(rb[2]) / 2, y, size,
+                              ref="Ам", char_colors=[C_DIM] * len(rb[2]) if dim else None)
+                continue
+            c = tk.strip(",.!?:")
             st = tk.find(c)
             hl, col = [], C_HL
             if k in green:
@@ -1005,21 +1102,25 @@ class Lesson:
             draw_your_turn(fr, tt, t_again, length)
         tl.add(length, draw)
 
-    def story_sentence(self, story, k, lay, size):
+    def story_sentence(self, story, k, pages, where):
         """Өгүүлбэрийг үг үгээр, дараа нь бүтнээр уншина. Бусад өгүүлбэр дэлгэц дээр харагдана."""
         tl = self.tl
         sd = story["sentences"][k]
+        lay, size = pages[where[k]]
         toks = sd["s"].split(" ")
         t = 0.6
         steps = []
         for i, tk in enumerate(toks):
-            a = self.read(cap(tk.strip(",.!?")) + ".")
+            rb = rebus(tk)
+            a = self.read(cap(rb[0] if rb else tk.strip(",.!?:")) + ".")
             tl.sound(t, a)
+            if rb:
+                tl.sound(t - 0.05, SFX_POP)
             steps.append((t, t + dur(a) + 0.25, i))
             t += dur(a) + 0.4
         t += 0.2
         t_full = t
-        af = self.read(sd["s"])
+        af = self.read(plain(sd["s"]))
         tl.sound(t_full, af)
         tl.sound(t_full, SFX_POP)
         t = t_full + dur(af)
@@ -1029,11 +1130,12 @@ class Lesson:
             cw = next((i for st, en, i in steps if st <= tt < en), None)
             green = (k,) if tt >= t_full else ()
             self.draw_story(fr, d, story, lay, size, k, cw, done=range(k), green=green)
-            paste_emoji(fr, sd.get("emoji"), W / 2, 150, 100 * pop(tt, 0.1))
+            hop = abs(math.sin(math.pi * 2.0 * tt)) * 18 if 0.6 <= tt < t_full + dur(af) else 0
+            paste_emoji(fr, sd.get("emoji"), W / 2, 150 - hop, 100 * pop(tt, 0.1))
             draw_your_turn(fr, tt, t_full + dur(af) + 0.1, length)
         tl.add(length, draw)
 
-    def story_full(self, story, lay, size):
+    def story_full(self, story, pages, where):
         """Өгүүллэгийг эхнээс нь бүтнээр уншина."""
         tl = self.tl
         intro = self.say("Одоо бүтнээр нь уншъя.")
@@ -1041,7 +1143,7 @@ class Lesson:
         t = 0.3 + dur(intro) + 0.4
         spans = []
         for sd in story["sentences"]:
-            af = self.read(sd["s"])
+            af = self.read(plain(sd["s"]))
             tl.sound(t, af)
             spans.append((t, t + dur(af) + 0.3))
             t += dur(af) + 0.55
@@ -1050,6 +1152,12 @@ class Lesson:
 
         def draw(fr, d, tt):
             cur = next((k for k, (st, en) in enumerate(spans) if st <= tt < en), None)
+            if cur is None:   # өгүүлбэр хоорондын завсар: дараагийн өгүүлбэрийн хуудсыг харуулна
+                nxt = next((k for k, (st, en) in enumerate(spans) if tt < st), n - 1)
+                page = where[nxt]
+            else:
+                page = where[cur]
+            lay, size = pages[page]
             done = range(n) if tt >= spans[-1][1] else range(cur or 0)
             self.draw_story(fr, d, story, lay, size, cur, None, done=done,
                             green=(cur,) if cur is not None else ())
@@ -1096,6 +1204,163 @@ class Lesson:
                 x = W / 2 + (j - (n - 1) / 2) * 34
                 fill = (235, 70, 70) if j < idx or (j == idx and ok) else (225, 225, 232)
                 d.ellipse([x - 10, 680 - 10, x + 10, 680 + 10], fill=fill)
+        tl.add(length, draw)
+
+    # -- дүрүүд, үгийн шид, хэмнэл -------------------------------------
+    def characters(self, chars):
+        """Өгүүллэгийн дүрүүд нэг нэгээрээ үсэрч гарч ирэн танилцуулна. Хүүхэд нэрийг давтана."""
+        tl = self.tl
+        t = 0.5
+        marks = []
+        for c in chars:
+            tl.sound(t, SFX_POP)
+            a = self.say(c["say"])
+            tl.sound(t + 0.25, a)
+            t_name = t + 0.25 + dur(a) + 0.3
+            nm = self.read(c["name"] + ".")
+            tl.sound(t_name, nm)
+            marks.append((t, t_name, t_name + dur(nm)))
+            t = t_name + dur(nm) + 1.4 + self.extra / 2
+        length = t + 0.6
+        n = len(chars)
+        xs = [W / 2 + (i - (n - 1) / 2) * 360 for i in range(n)]
+
+        def draw(fr, d, tt):
+            for i, c in enumerate(chars):
+                t0, tn, te = marks[i]
+                sc = pop(tt, t0, 0.5)
+                if sc <= 0:
+                    continue
+                talking = t0 <= tt < te + 0.3
+                hop = abs(math.sin(math.pi * 2.4 * (tt - t0))) * 26 if talking else 0
+                d.ellipse([xs[i] - 120 * sc, 450 - 18, xs[i] + 120 * sc, 450 + 18], fill=(222, 228, 240))
+                paste_emoji(fr, c["emoji"], xs[i], 330 - hop, 210 * sc)
+                hl = [(0, len(c["name"]))] if tn <= tt < te + 0.2 else []
+                draw_word(d, c["name"], xs[i], 545, 84 * pop(tt, tn - 0.2, 0.4), hl=hl, ref="Ам")
+                if te <= tt < te + 1.3:
+                    paste_emoji(fr, "🗣️", xs[i] + 120, 470, 64 * pop(tt, te, 0.3))
+        tl.add(length, draw)
+
+    @staticmethod
+    def _changed(old, new):
+        """new үгийн аль үсэг шинээр орж ирснийг олно (жижиг, том үсэг ялгахгүй)."""
+        sm = difflib.SequenceMatcher(None, old.lower(), new.lower())
+        keep = set()
+        for a, b, size in sm.get_matching_blocks():
+            keep.update(range(b, b + size))
+        return [i for i in range(len(new)) if i not in keep]
+
+    def magic(self, chain):
+        """Үгийн шид: үсэг нэмэх/солиход шинэ үг, шинэ зураг гарч ирнэ."""
+        tl = self.tl
+        tl.sound(0.05, SFX_POP)
+        t = 0.6
+        steps = []   # (эхлэх, үг, зураг, шинэ үсгүүд, нисэх эхлэл)
+        a = self.read(cap(chain[0]["w"]) + ".")
+        tl.sound(t, a)
+        steps.append((0.0, chain[0]["w"], chain[0].get("emoji"), [], None))
+        t += dur(a) + 0.6
+        for j in range(1, len(chain)):
+            old, new = chain[j - 1]["w"], chain[j]["w"]
+            t_fly = t
+            tl.sound(t_fly, SFX_WHOOSH)
+            tl.sound(t_fly + 0.5, SFX_DING)
+            a = self.read(cap(new) + ".")
+            tl.sound(t_fly + 0.85, a)
+            steps.append((t_fly, new, chain[j].get("emoji"), self._changed(old, new), t_fly))
+            t = t_fly + 0.85 + dur(a) + 0.6
+        length = t + 1.1 + self.extra
+        size = 190
+
+        def draw(fr, d, tt):
+            k = max(i for i, st in enumerate(steps) if st[0] <= tt)
+            _, word, emoji, changed, t_fly = steps[k]
+            p = clamp((tt - t_fly) / 0.5) if t_fly is not None else 1.0
+            f = font(F_TEXT, size)
+            _, top, _, bot = f.getbbox("Ам", anchor="ls")
+            base = 430 - (top + bot) / 2
+            x0 = W / 2 - f.getlength(word) / 2
+            glow = t_fly is not None and t_fly + 0.5 <= tt < t_fly + 2.0
+            for i, ch in enumerate(word):
+                x = x0 + f.getlength(word[:i])
+                y = base
+                if i in changed:
+                    y = base - 260 * (1 - ease_out(p))
+                    if glow:
+                        d.rounded_rectangle([x - 6, base - size * 0.78, x + f.getlength(ch) + 6, base + size * 0.12],
+                                            int(size * 0.14), fill=C_HL)
+                d.text((x, y), ch, font=f, fill=letter_color(ch), anchor="ls")
+            if t_fly is not None and t_fly + 0.45 <= tt < t_fly + 1.1:   # оч гялбаа
+                q = (tt - t_fly - 0.45) / 0.65
+                for ang in range(0, 360, 60):
+                    r = 120 + 140 * q
+                    paste_emoji(fr, "✨", W / 2 + r * math.cos(math.radians(ang)),
+                                360 + 0.5 * r * math.sin(math.radians(ang)), 52 * (1 - q))
+            if emoji:
+                es = pop(tt, (t_fly + 0.55) if t_fly is not None else 0.1, 0.45)
+                paste_emoji(fr, emoji, W / 2, 170, 140 * es)
+            draw_your_turn(fr, tt, steps[-1][0] + 1.6, length)
+        tl.add(length, draw)
+
+    def chant(self, bars):
+        """Хэмнэлээр хэлэх: хоолой нэг хэмжээнд хэлж, дараагийнхад хүүхэд давтана. Цохилт арын аятай давхцана."""
+        tl = self.tl
+        lead = (-tl.t) % CHANT_BAR + CHANT_BAR    # эхний цохилт арын аяны хэмжээн дээр буух
+        nb = 2 * len(bars)
+        tl.sound(lead, drum_loop(nb))
+        for i in range(4):                        # тоолж оруулах: 4 тик
+            tl.sound(lead - (4 - i) * CHANT_BEAT, SFX_TICK)
+        for b, items in enumerate(bars):
+            t0 = lead + 2 * b * CHANT_BAR
+            for text, beat, span in items:
+                a = self.read(cap(text) + ".")
+                tl.sound(t0 + beat * CHANT_BEAT - 0.04, a)
+        length = lead + nb * CHANT_BAR + 0.9
+
+        def draw(fr, d, tt):
+            lt = tt - lead
+            if lt < 0:   # тоолж оруулах
+                k = int((tt - (lead - 4 * CHANT_BEAT)) / CHANT_BEAT)
+                draw_text_center(d, "Бэлэн үү?", W / 2, 260, 84 * pop(tt, 0.1), (255, 112, 40), stroke=7,
+                                 stroke_fill=C_WHITE)
+                paste_emoji(fr, "🥁", W / 2, 420, 150 * pop(tt, 0.2))
+                if 0 <= k < 4:
+                    draw_text_center(d, str(k + 1), W / 2, 590, 70, C_INK)
+                return
+            bi = min(nb - 1, int(lt // CHANT_BAR))
+            voice = bi % 2 == 0
+            items = bars[bi // 2]
+            blt = lt - bi * CHANT_BAR
+            beat = blt / CHANT_BEAT
+            cur = int(beat)
+            since = (beat - cur) * CHANT_BEAT
+            bounce = 1 + 0.10 * math.exp(-since * 9)
+            n = len(items)
+            widths = [max(180, word_width(text, 86) + 70) for text, _, _ in items]
+            gap = 30
+            x = W / 2 - (sum(widths) + gap * (n - 1)) / 2
+            for (text, b0, span), w in zip(items, widths):
+                cx = x + w / 2
+                x += w + gap
+                on = b0 <= beat < b0 + span
+                shown = (not voice) or beat >= b0 - 0.2
+                sc = (pop(blt, b0 * CHANT_BEAT - 0.2, 0.3) if voice else 1.0) * (bounce if on else 1)
+                if shown:
+                    draw_tile(d, text, cx, 360, w, 170, scale=sc, text_size=86,
+                              fill=(C_HL if voice else (176, 232, 170)) if on else C_WHITE)
+            for i in range(4):
+                cx = W / 2 - 90 + i * 60
+                r = 20 * (1 + 0.25 * math.exp(-since * 8)) if i == cur else 12
+                col = ((255, 112, 40) if voice else (63, 166, 90)) if i == cur else (210, 212, 222)
+                d.ellipse([cx - r, 650 - r, cx + r, 650 + r], fill=col)
+            if not voice:
+                f = font(F_HEAD, 44)
+                label = "Одоо чи!"
+                tw = f.getlength(label)
+                x0 = W / 2 - (tw + 90) / 2
+                d.rounded_rectangle([x0, 540, x0 + tw + 90, 596], 28, fill=(63, 166, 90))
+                paste_emoji(fr, "🗣️", x0 + 38, 568, 40)
+                d.text((x0 + 70, 568), label, font=f, fill=C_WHITE, anchor="lm")
         tl.add(length, draw)
 
     def outro(self):
@@ -1148,7 +1413,17 @@ class Lesson:
                 self.section("sort")
                 for i, s in enumerate(st["sort"]):
                     self.syl_sort(s, i, len(st["sort"]))
-        if cfg.get("words"):
+        if cfg.get("characters"):
+            self.section("characters")
+            self.characters(cfg["characters"])
+        if cfg.get("magic"):
+            self.section("magic")
+            for chain in cfg["magic"]:
+                self.magic(chain)
+        if cfg.get("chant"):
+            self.section("chant")
+            self.chant(cfg["chant"])
+        if cfg.get("words") and cfg.get("video_words", True):
             self.section("words")
             for w in cfg["words"]:
                 self.word(w)
@@ -1159,11 +1434,11 @@ class Lesson:
         story = cfg.get("story")
         if story:
             self.section("story")
-            lay, size = self.story_layout(story)
+            pages, where = self.story_pages(story)
             self.story_title(story)
             for k in range(len(story["sentences"])):
-                self.story_sentence(story, k, lay, size)
-            self.story_full(story, lay, size)
+                self.story_sentence(story, k, pages, where)
+            self.story_full(story, pages, where)
         if cfg.get("questions"):
             self.section("questions")
             for i, q in enumerate(cfg["questions"]):
@@ -1241,7 +1516,9 @@ def validate(cfg):
     items = [w["w"] for w in cfg.get("words", [])] + [s["s"] for s in cfg.get("sentences", [])] + cfg.get("quiz", [])
     items += [i.get("example", "") for i in cfg.get("letter_info", {}).values() if not i.get("listen")]
     story = cfg.get("story") or {}
-    items += [story.get("title", "")] + [sd["s"] for sd in story.get("sentences", [])]
+    items += [story.get("title", "")] + [plain(REBUS.sub("", sd["s"])) for sd in story.get("sentences", [])]
+    items += [st["w"] for chain in cfg.get("magic", []) for st in chain]
+    items += [x[0] for b in cfg.get("chant", []) for x in b] + [c["name"] for c in cfg.get("characters", [])]
     st = cfg.get("syl_types") or {}
     items += st.get("explain", []) + [x for p in st.get("pairs", []) for x in p] + st.get("sort", [])
     for it in items:

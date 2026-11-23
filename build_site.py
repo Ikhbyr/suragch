@@ -172,9 +172,14 @@ def build_lesson(path):
         data["story_emoji"] = story.get("emoji", "")
     for s, is_story in [(x, False) for x in cfg.get("sentences", [])] + [(x, True) for x in (story or {}).get("sentences", [])]:
         toks = s["s"].split(" ")
+        words = []
+        for tk in toks:
+            rb = M.rebus(tk)   # зурган үг: дүрсийг харуулж, нэрийг нь уншина
+            words.append({"t": rb[1] + rb[2], "a": R(M.cap(rb[0]) + ".")} if rb else
+                         {"t": tk, "a": R(M.cap(tk.strip(",.!?:")) + ".")})
         data["sentences"].append({
-            "s": s["s"], "a": R(s["s"]), "emoji": s.get("emoji", ""), "story": is_story,
-            "words": [{"t": tk, "a": R(M.cap(tk.strip(",.!?")) + ".")} for tk in toks],
+            "s": M.plain(s["s"]), "a": R(M.plain(s["s"])), "emoji": s.get("emoji", ""), "story": is_story,
+            "words": words,
         })
     # тоглоомд ашиглах үгс (давхардалгүй)
     pool = {w["w"]: w for w in data["words"]}

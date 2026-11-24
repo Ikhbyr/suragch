@@ -618,6 +618,10 @@ class Lesson:
         focus = self.cfg.get("syllable_consonants")
         if focus:
             cons = [c for c in cons if c in focus]
+        vfocus = self.cfg.get("syllable_vowels")   # шинэ эгшиг: мо со ро хо / ом ос ор ох
+        if vfocus:
+            vow = [v for v in vow if v in vfocus]
+            return [g for g in [[c + v for c in cons] for v in vow] + [[v + c for c in cons] for v in vow] if g]
         groups = [[c + v for v in vow] for c in cons]
         groups += [[v + c for v in vow] for c in cons]
         if "й" in self.letters:
